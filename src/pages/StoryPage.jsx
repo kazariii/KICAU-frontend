@@ -86,39 +86,24 @@ function SceneArt({ scene }) {
   const p = palettes[scene] || palettes.pasar;
   return (
     <div
+      className="absolute inset-0 overflow-hidden"
       style={{
-        position: "absolute",
-        inset: 0,
         background: `linear-gradient(180deg, ${p.sky} 0%, ${p.sky} 60%, ${p.ground} 100%)`,
-        overflow: "hidden",
       }}
     >
       <div
-        style={{
-          position: "absolute",
-          top: 60,
-          right: 80,
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          background: p.accent,
-          boxShadow: `0 0 80px ${p.accent}`,
-        }}
+        className="absolute right-20 top-15 h-20 w-20 rounded-full"
+        style={{ background: p.accent, boxShadow: `0 0 80px ${p.accent}` }}
       />
-      <div style={{ position: "absolute", top: 40, left: 80 }}>
+      <div className="absolute left-20 top-10">
         <Cloud size={70} color="rgba(255,255,255,0.85)" />
       </div>
-      <div style={{ position: "absolute", top: 100, left: "55%" }}>
+      <div className="absolute left-[55%] top-25">
         <Cloud size={50} color="rgba(255,255,255,0.65)" />
       </div>
       <svg
         viewBox="0 0 800 400"
-        style={{
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
-          height: "60%",
-        }}
+        className="absolute bottom-0 h-[60%] w-full"
         preserveAspectRatio="none"
       >
         <path
@@ -134,12 +119,7 @@ function SceneArt({ scene }) {
       {scene === "pasar" && (
         <svg
           viewBox="0 0 800 400"
-          style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            height: "70%",
-          }}
+          className="absolute bottom-0 h-[70%] w-full"
           preserveAspectRatio="xMidYEnd meet"
         >
           <rect
@@ -158,12 +138,7 @@ function SceneArt({ scene }) {
       {scene === "hutan" && (
         <svg
           viewBox="0 0 800 400"
-          style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            height: "80%",
-          }}
+          className="absolute bottom-0 h-[80%] w-full"
           preserveAspectRatio="xMidYEnd meet"
         >
           {[120, 220, 600, 700].map((x, i) => (
@@ -183,12 +158,7 @@ function SceneArt({ scene }) {
       {scene === "sekolah" && (
         <svg
           viewBox="0 0 800 400"
-          style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            height: "70%",
-          }}
+          className="absolute bottom-0 h-[70%] w-full"
           preserveAspectRatio="xMidYEnd meet"
         >
           <rect
@@ -206,16 +176,7 @@ function SceneArt({ scene }) {
         </svg>
       )}
       <Sparkles count={6} seed={scene.length} />
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 30,
-          background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.08))",
-        }}
-      />
+      <div className="absolute inset-x-0 bottom-0 h-7.5 bg-linear-to-b from-transparent to-black/10" />
     </div>
   );
 }
@@ -228,79 +189,41 @@ const LOADING_TIPS = [
 ];
 
 function StoryLoading() {
-  const tips = LOADING_TIPS;
   const [tip, setTip] = useState(0);
   useEffect(() => {
     const id = setInterval(
       () => setTip((t) => (t + 1) % LOADING_TIPS.length),
-      1600
+      1600,
     );
     return () => clearInterval(id);
   }, []);
   return (
-    <div
-      style={{
-        minHeight: "calc(100vh - 80px)",
-        display: "grid",
-        placeItems: "center",
-        padding: 32,
-      }}
-    >
-      <div style={{ textAlign: "center", maxWidth: 480 }}>
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <div className="anim-float">
+    <div className="grid min-h-[calc(100vh-80px)] place-items-center p-8">
+      <div className="max-w-120 text-center">
+        <div className="relative inline-block">
+          <div className="animate-float">
             <Kimo pose="thinking" size={180} />
           </div>
-          <div
-            style={{
-              position: "absolute",
-              top: -10,
-              right: -20,
-              animation: "spin-slow 3s linear infinite",
-            }}
-          >
+          <div className="absolute -right-5 -top-2.5 animate-spin-slow">
             <Icon name="sparkle-grad" size={42} />
           </div>
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: -20,
-              animation: "spin-slow 4s linear infinite reverse",
-            }}
-          >
+          <div className="absolute bottom-0 -left-5 animate-spin-slow [animation-direction:reverse]">
             <Icon name="sparkle-grad" size={28} />
           </div>
         </div>
-        <h2 style={{ fontSize: 30, marginTop: 18 }}>Menyusun ceritamu...</h2>
+        <h2 className="mt-4.5 text-[30px]">Menyusun ceritamu...</h2>
         <p
           key={tip}
-          className="anim-slide"
-          style={{
-            marginTop: 8,
-            color: "var(--ink-500)",
-            fontWeight: 700,
-            fontSize: 15,
-          }}
+          className="mt-2 animate-slide-up text-[15px] font-bold text-ink-500"
         >
-          {tips[tip]}
+          {LOADING_TIPS[tip]}
         </p>
-        <div
-          style={{
-            display: "flex",
-            gap: 6,
-            justifyContent: "center",
-            marginTop: 24,
-          }}
-        >
+        <div className="mt-6 flex justify-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
+              className="h-3 w-3 rounded-full bg-brand-500"
               style={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                background: "var(--brand-500)",
                 animation: `pop-in 1.2s ease-in-out ${i * 0.15}s infinite alternate`,
               }}
             />
@@ -368,9 +291,8 @@ export default function StoryPage() {
         const text = data.reply || data.message || "";
         const jsonStart = text.indexOf("{");
         const jsonEnd = text.lastIndexOf("}");
-        if (jsonStart < 0 || jsonEnd < 0) {
+        if (jsonStart < 0 || jsonEnd < 0)
           throw new Error("Format tidak terbaca");
-        }
         const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
         if (!cancelled) setStory(parsed);
       } catch {
@@ -395,7 +317,7 @@ export default function StoryPage() {
   if (status === "loading") return <StoryLoading />;
   if (!story)
     return (
-      <div className="page">
+      <div className="mx-auto max-w-7xl px-7 py-8">
         Terjadi kesalahan. <button onClick={onBack}>Kembali</button>
       </div>
     );
@@ -407,9 +329,7 @@ export default function StoryPage() {
   function next() {
     if (isLast) {
       navigate("/story/complete", {
-        state: {
-          result: { story, value: story.value || params.moral },
-        },
+        state: { result: { story, value: story.value || params.moral } },
       });
     } else {
       setPage(page + 1);
@@ -421,78 +341,39 @@ export default function StoryPage() {
   }
 
   return (
-    <div style={{ minHeight: "calc(100vh - 80px)", padding: "0 24px 24px" }}>
+    <div className="min-h-[calc(100vh-80px)] px-6 pb-6">
       {/* Top bar */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "16px 0",
-          maxWidth: 980,
-          margin: "0 auto",
-        }}
-      >
+      <div className="mx-auto flex max-w-245 items-center gap-3 py-4">
         <button
           onClick={onBack}
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: "50%",
-            background: "white",
-            border: "1px solid var(--line)",
-            display: "grid",
-            placeItems: "center",
-            cursor: "pointer",
-            color: "var(--ink-700)",
-            boxShadow: "var(--shadow-sm)",
-          }}
           aria-label="Kembali"
+          className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-line bg-white text-ink-700 shadow-soft"
         >
           <Icon name="back" size={20} />
         </button>
-        <div style={{ flex: 1, padding: "0 16px" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 600,
-              fontSize: 14,
-              color: "var(--ink-900)",
-            }}
-          >
+        <div className="flex-1 px-4">
+          <div className="font-display text-sm font-semibold text-ink-900">
             {story.title}
           </div>
-          <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
+          <div className="mt-2 flex gap-1">
             {story.pages.map((_, i) => (
               <div
                 key={i}
-                style={{
-                  height: 6,
-                  borderRadius: 999,
-                  transition: "background .3s",
-                  flex: 1,
-                  background:
-                    i < page
-                      ? "var(--brand-500)"
-                      : i === page
-                        ? "var(--brand-300)"
-                        : "rgba(122,69,42,0.18)",
-                }}
+                className={[
+                  "h-1.5 flex-1 rounded-full transition-colors duration-300",
+                  i < page
+                    ? "bg-brand-500"
+                    : i === page
+                      ? "bg-brand-300"
+                      : "bg-[rgba(122,69,42,0.18)]",
+                ].join(" ")}
               />
             ))}
           </div>
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: 6,
-            fontSize: 12,
-            fontWeight: 800,
-            color: "var(--ink-500)",
-          }}
-        >
+        <div className="flex gap-1.5 text-xs font-extrabold text-ink-500">
           <span>{String(page + 1).padStart(2, "0")}</span>
-          <span style={{ opacity: 0.4 }}>/</span>
+          <span className="opacity-40">/</span>
           <span>{String(totalPages).padStart(2, "0")}</span>
         </div>
       </div>
@@ -500,136 +381,37 @@ export default function StoryPage() {
       {/* Scene */}
       <div
         key={page}
-        className="anim-pop"
-        style={{
-          position: "relative",
-          maxWidth: 980,
-          margin: "0 auto",
-          height: "min(680px, calc(100vh - 200px))",
-          minHeight: 540,
-          borderRadius: 36,
-          overflow: "hidden",
-          border: "1px solid var(--line)",
-          boxShadow: "var(--shadow-lg)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
+        className="relative mx-auto flex h-[min(680px,calc(100vh-200px))] min-h-135 max-w-245 animate-pop-in flex-col justify-between overflow-hidden rounded-[36px] border border-line shadow-pop"
       >
         <SceneArt scene={current.scene || (page % 2 ? "hutan" : "pasar")} />
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 2,
-            margin: 24,
-            marginBottom: 0,
-          }}
-        >
+        <div className="relative z-2 m-6 mb-0">
           {!current.type || current.type === "narration" ? (
-            <div
-              style={{
-                background: "white",
-                padding: "20px 24px",
-                borderRadius: 24,
-                fontFamily: "var(--font-display)",
-                fontWeight: 500,
-                fontSize: 22,
-                lineHeight: 1.35,
-                color: "var(--ink-900)",
-                boxShadow: "var(--shadow-md)",
-                border: "1px solid var(--line)",
-                maxWidth: 560,
-              }}
-            >
+            <div className="max-w-140 rounded-3xl border border-line bg-white px-6 py-5 font-display text-[22px] font-medium leading-[1.35] text-ink-900 shadow-card">
               {current.text}
             </div>
           ) : (
             <div>
-              <div
-                style={{
-                  background: "white",
-                  padding: "18px 22px",
-                  borderRadius: 22,
-                  boxShadow: "var(--shadow-md)",
-                  border: "1px solid var(--line)",
-                  maxWidth: 560,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: "var(--brand-700)",
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    marginBottom: 6,
-                  }}
-                >
+              <div className="max-w-140 rounded-[22px] border border-line bg-white px-5 py-4 shadow-card">
+                <div className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.06em] text-brand-700">
                   Pilihanmu
                 </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 600,
-                    fontSize: 22,
-                    color: "var(--ink-900)",
-                    lineHeight: 1.25,
-                  }}
-                >
+                <div className="font-display text-[22px] font-semibold leading-tight text-ink-900">
                   {current.question}
                 </div>
               </div>
               {!choiceFeedback ? (
-                <div
-                  style={{
-                    marginTop: 14,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                    maxWidth: 560,
-                  }}
-                >
+                <div className="mt-3.5 flex max-w-140 flex-col gap-2.5">
                   {current.options.map((o, i) => (
                     <button
                       key={i}
                       onClick={() => pickChoice(o)}
-                      style={{
-                        background: "white",
-                        border: "2px solid var(--line)",
-                        padding: "14px 18px",
-                        borderRadius: 18,
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 15,
-                        color: "var(--ink-900)",
-                        transition: "all .15s",
-                        boxShadow: "0 3px 0 rgba(122,69,42,0.06)",
-                      }}
+                      className="flex cursor-pointer items-center gap-3 rounded-[18px] border-2 border-line bg-white px-4.5 py-3.5 font-body text-[15px] text-ink-900 shadow-[0_3px_0_rgba(122,69,42,0.06)] transition hover:border-brand-300"
                     >
-                      <span
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 10,
-                          background: "var(--brand-50)",
-                          color: "var(--brand-700)",
-                          display: "grid",
-                          placeItems: "center",
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 700,
-                          fontSize: 14,
-                          flexShrink: 0,
-                        }}
-                      >
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-brand-50 font-display text-sm font-bold text-brand-700">
                         {String.fromCharCode(65 + i)}
                       </span>
-                      <span
-                        style={{ flex: 1, textAlign: "left", fontWeight: 700 }}
-                      >
+                      <span className="flex-1 text-left font-bold">
                         {o.text}
                       </span>
                     </button>
@@ -637,35 +419,18 @@ export default function StoryPage() {
                 </div>
               ) : (
                 <div
-                  className="anim-slide"
-                  style={{
-                    marginTop: 14,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                    padding: "16px 18px",
-                    borderRadius: 22,
-                    border: "2px solid",
-                    maxWidth: 560,
-                    background: choiceFeedback.correct
-                      ? "linear-gradient(120deg, #DDF5D2, #B8DFB8)"
-                      : "linear-gradient(120deg, #FFE4D2, #FFD0B0)",
-                    borderColor: choiceFeedback.correct ? "#7DBA6F" : "#F5B872",
-                  }}
+                  className={[
+                    "mt-3.5 flex max-w-140 animate-slide-up items-center gap-3.5 rounded-[22px] border-2 px-4.5 py-4",
+                    choiceFeedback.correct
+                      ? "border-[#7DBA6F] bg-linear-to-r from-[#DDF5D2] to-[#B8DFB8]"
+                      : "border-[#F5B872] bg-linear-to-r from-[#FFE4D2] to-[#FFD0B0]",
+                  ].join(" ")}
                 >
                   <div
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: "50%",
-                      background: choiceFeedback.correct
-                        ? "#7DBA6F"
-                        : "#F5B872",
-                      display: "grid",
-                      placeItems: "center",
-                      color: "white",
-                      flexShrink: 0,
-                    }}
+                    className={[
+                      "grid h-14 w-14 shrink-0 place-items-center rounded-full text-white",
+                      choiceFeedback.correct ? "bg-[#7DBA6F]" : "bg-[#F5B872]",
+                    ].join(" ")}
                   >
                     <Icon
                       name={choiceFeedback.correct ? "check" : "sparkle-grad"}
@@ -673,27 +438,13 @@ export default function StoryPage() {
                       color="white"
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-display)",
-                        fontWeight: 600,
-                        fontSize: 18,
-                        color: "var(--ink-900)",
-                      }}
-                    >
+                  <div className="flex-1">
+                    <div className="font-display text-lg font-semibold text-ink-900">
                       {choiceFeedback.correct
                         ? "Pilihan yang baik!"
                         : "Yuk pikir lagi..."}
                     </div>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: "var(--ink-700)",
-                        marginTop: 4,
-                      }}
-                    >
+                    <div className="mt-1 text-sm font-semibold text-ink-700">
                       {choiceFeedback.msg}
                     </div>
                   </div>
@@ -703,53 +454,23 @@ export default function StoryPage() {
           )}
         </div>
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 2,
-            padding: 24,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            background:
-              "linear-gradient(180deg, transparent, rgba(0,0,0,0.06))",
-          }}
-        >
+        <div className="relative z-2 flex items-center gap-3 bg-linear-to-b from-transparent to-black/6 p-6">
           <button
             onClick={() => page > 0 && setPage(page - 1)}
             disabled={page === 0}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              background: "white",
-              border: "1px solid var(--line)",
-              display: "grid",
-              placeItems: "center",
-              cursor: "pointer",
-              color: "var(--ink-700)",
-              boxShadow: "var(--shadow-sm)",
-              opacity: page === 0 ? 0.4 : 1,
-            }}
+            className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-line bg-white text-ink-700 shadow-soft disabled:opacity-40"
           >
             <Icon name="back" size={20} />
           </button>
           <button
             disabled={current.type === "choice" && !choiceFeedback}
             onClick={next}
-            className="btn btn-primary"
-            style={{
-              flex: 1,
-              maxWidth: 320,
-              padding: "16px 22px",
-              fontSize: 16,
-              opacity: current.type === "choice" && !choiceFeedback ? 0.5 : 1,
-            }}
+            className="inline-flex max-w-[320px] flex-1 items-center justify-center gap-2.5 rounded-full bg-brand-500 px-5 py-4 font-body text-base font-extrabold text-white shadow-primary transition hover:-translate-y-px hover:bg-brand-600 active:translate-y-0.5 disabled:opacity-50"
           >
             {isLast ? "Selesai!" : "Lanjut"}
             <Icon name={isLast ? "trophy" : "play"} size={16} color="white" />
           </button>
-          <div style={{ width: 44 }} />
+          <div className="w-11" />
         </div>
       </div>
     </div>

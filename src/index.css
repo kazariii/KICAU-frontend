@@ -1,50 +1,57 @@
-@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
 @import "tailwindcss";
 
-:root {
-  --cream-50: #fff9ee;
-  --cream-100: #fcf3e4;
-  --cream-200: #f7e9d2;
-  --cream-300: #f0ddb9;
+@theme {
+  --color-cream-50: #fff9ee;
+  --color-cream-100: #fcf3e4;
+  --color-cream-200: #f7e9d2;
+  --color-cream-300: #f0ddb9;
 
-  --ink-900: #2a140a;
-  --ink-700: #4d2613;
-  --ink-500: #7a452a;
-  --ink-300: #b98e6e;
+  --color-ink-900: #2a140a;
+  --color-ink-700: #4d2613;
+  --color-ink-500: #7a452a;
+  --color-ink-300: #b98e6e;
 
-  --brand-50: #ffedd2;
-  --brand-100: #ffd9a6;
-  --brand-300: #fbb04a;
-  --brand-500: #f59330;
-  --brand-600: #e47a17;
-  --brand-700: #bc5f10;
+  --color-brand-50: #ffedd2;
+  --color-brand-100: #ffd9a6;
+  --color-brand-300: #fbb04a;
+  --color-brand-500: #f59330;
+  --color-brand-600: #e47a17;
+  --color-brand-700: #bc5f10;
 
-  --accent-pink: #ffc2cb;
-  --accent-rose: #f8aeb8;
-  --accent-lilac: #cdc7ee;
-  --accent-mint: #b8dfb8;
-  --accent-yellow: #fcd968;
-  --accent-sky: #bfe3f3;
+  --color-accent-pink: #ffc2cb;
+  --color-accent-rose: #f8aeb8;
+  --color-accent-lilac: #cdc7ee;
+  --color-accent-mint: #b8dfb8;
+  --color-accent-yellow: #fcd968;
+  --color-accent-sky: #bfe3f3;
 
-  --surface: #ffffff;
-  --line: rgba(122, 69, 42, 0.14);
-  --line-strong: rgba(122, 69, 42, 0.28);
-
-  --shadow-sm:
-    0 1px 0 rgba(122, 69, 42, 0.06), 0 2px 6px rgba(122, 69, 42, 0.06);
-  --shadow-md:
-    0 2px 0 rgba(122, 69, 42, 0.06), 0 8px 18px rgba(122, 69, 42, 0.08);
-  --shadow-lg:
-    0 6px 0 rgba(122, 69, 42, 0.06), 0 18px 36px rgba(122, 69, 42, 0.14);
-  --shadow-press: inset 0 -3px 0 rgba(0, 0, 0, 0.1);
-
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --color-line: rgba(122, 69, 42, 0.14);
+  --color-line-strong: rgba(122, 69, 42, 0.28);
 
   --font-display: "Fredoka", system-ui, sans-serif;
   --font-body: "Nunito", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
+
+  --radius-card: 24px;
+  --radius-xl-card: 32px;
+
+  --shadow-soft:
+    0 1px 0 rgba(122, 69, 42, 0.06), 0 2px 6px rgba(122, 69, 42, 0.06);
+  --shadow-card:
+    0 2px 0 rgba(122, 69, 42, 0.06), 0 8px 18px rgba(122, 69, 42, 0.08);
+  --shadow-pop:
+    0 6px 0 rgba(122, 69, 42, 0.06), 0 18px 36px rgba(122, 69, 42, 0.14);
+  --shadow-press: inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-primary: 0 4px 0 #bc5f10, 0 8px 18px rgba(122, 69, 42, 0.08);
+
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-spin-slow: spin-slow 3s linear infinite;
+  --animate-pop-in: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-slide-up: slide-up 0.4s ease both;
+  --animate-pulse-ring: pulse-ring 1.2s infinite;
+  --animate-wiggle: wiggle 1s ease-in-out infinite;
+  --animate-confetti-fall: confetti-fall 5s linear infinite;
 }
 
 * {
@@ -57,10 +64,19 @@ body {
 }
 body {
   font-family: var(--font-body);
-  color: var(--ink-700);
-  background: var(--cream-100);
+  color: var(--color-ink-700);
+  background: var(--color-cream-100);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--font-display);
+  color: var(--color-ink-900);
 }
 
 .app-bg {
@@ -81,7 +97,7 @@ body {
       rgba(205, 199, 238, 0.3),
       transparent 60%
     ),
-    var(--cream-100);
+    var(--color-cream-100);
   position: relative;
 }
 .app-bg::before {
@@ -113,219 +129,6 @@ body {
   pointer-events: none;
   z-index: 0;
   opacity: 0.7;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5 {
-  font-family: var(--font-display);
-  color: var(--ink-900);
-  letter-spacing: -0.01em;
-  margin: 0;
-}
-p {
-  margin: 0;
-}
-
-.app-shell {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.top-nav {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  backdrop-filter: blur(14px);
-  background: rgba(255, 249, 238, 0.85);
-  border-bottom: 1px solid var(--line);
-}
-.top-nav-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 14px 28px;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 22px;
-  color: var(--brand-600);
-  text-decoration: none;
-}
-.brand .logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(160deg, var(--brand-300), var(--brand-600));
-  display: grid;
-  place-items: center;
-  box-shadow: var(--shadow-sm);
-}
-.nav-tabs {
-  display: flex;
-  gap: 6px;
-  margin-left: 12px;
-}
-.nav-tab {
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink-500);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.nav-tab:hover {
-  background: rgba(245, 147, 48, 0.1);
-  color: var(--brand-700);
-}
-.nav-tab.is-active {
-  background: var(--brand-500);
-  color: white;
-  box-shadow: var(--shadow-press);
-}
-.nav-spacer {
-  flex: 1;
-}
-.xp-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: white;
-  border: 1px solid var(--line);
-  padding: 6px 12px 6px 6px;
-  border-radius: 999px;
-  font-weight: 800;
-  color: var(--ink-700);
-  font-size: 13px;
-  box-shadow: var(--shadow-sm);
-}
-.xp-pill .dot {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: linear-gradient(160deg, var(--accent-yellow), var(--brand-500));
-  display: grid;
-  place-items: center;
-  color: var(--ink-900);
-  font-size: 14px;
-}
-.avatar-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(160deg, var(--brand-300), var(--brand-600));
-  border: 2px solid white;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-
-.page {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 28px 80px;
-  width: 100%;
-}
-
-.btn {
-  border: 0;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 15px;
-  padding: 14px 22px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    background 0.12s ease;
-  white-space: nowrap;
-}
-.btn-primary {
-  background: var(--brand-500);
-  color: white;
-  box-shadow:
-    0 4px 0 var(--brand-700),
-    var(--shadow-md);
-}
-.btn-primary:hover {
-  background: var(--brand-600);
-  transform: translateY(-1px);
-}
-.btn-primary:active {
-  transform: translateY(2px);
-  box-shadow:
-    0 0 0 var(--brand-700),
-    var(--shadow-sm);
-}
-.btn-ghost {
-  background: white;
-  color: var(--brand-700);
-  border: 2px solid var(--brand-500);
-  box-shadow: 0 3px 0 rgba(245, 147, 48, 0.3);
-}
-.btn-ghost:hover {
-  background: var(--brand-50);
-}
-.btn-soft {
-  background: var(--cream-200);
-  color: var(--ink-700);
-  box-shadow: var(--shadow-sm);
-}
-.btn-soft:hover {
-  background: var(--cream-300);
-}
-
-.card {
-  background: white;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-md);
-}
-
-.input {
-  width: 100%;
-  padding: 14px 18px;
-  border: 2px solid var(--line);
-  border-radius: var(--radius-md);
-  font-family: var(--font-body);
-  font-size: 15px;
-  background: white;
-  color: var(--ink-700);
-  outline: none;
-  transition:
-    border-color 0.12s,
-    box-shadow 0.12s;
-}
-.input:focus {
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 4px rgba(245, 147, 48, 0.15);
-}
-.input::placeholder {
-  color: var(--ink-300);
 }
 
 @keyframes float {
@@ -395,14 +198,4 @@ p {
     transform: translateY(120vh) rotate(720deg);
     opacity: 0;
   }
-}
-
-.anim-float {
-  animation: float 4s ease-in-out infinite;
-}
-.anim-pop {
-  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-.anim-slide {
-  animation: slide-up 0.4s ease both;
 }

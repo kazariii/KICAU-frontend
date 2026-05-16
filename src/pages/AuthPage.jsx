@@ -37,20 +37,12 @@ function SegBtn({ active, onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      style={{
-        flex: 1,
-        border: 0,
-        cursor: "pointer",
-        padding: "10px 16px",
-        borderRadius: 999,
-        fontFamily: "var(--font-body)",
-        fontWeight: 800,
-        fontSize: 14,
-        background: active ? "white" : "transparent",
-        color: active ? "var(--brand-700)" : "var(--ink-500)",
-        boxShadow: active ? "var(--shadow-sm)" : "none",
-        transition: "all .15s",
-      }}
+      className={[
+        "flex-1 rounded-full border-0 px-4 py-2.5 font-body text-sm font-extrabold transition",
+        active
+          ? "bg-white text-brand-700 shadow-soft"
+          : "bg-transparent text-ink-500",
+      ].join(" ")}
     >
       {children}
     </button>
@@ -59,28 +51,13 @@ function SegBtn({ active, onClick, children }) {
 
 function Field({ label, icon, children }) {
   return (
-    <label style={{ display: "block", position: "relative" }}>
-      <div
-        style={{
-          fontSize: 13,
-          fontWeight: 800,
-          color: "var(--ink-700)",
-          marginBottom: 6,
-        }}
-      >
+    <label className="relative block">
+      <div className="mb-1.5 text-[13px] font-extrabold text-ink-700">
         {label}
       </div>
-      <div style={{ position: "relative" }}>
+      <div className="relative">
         {icon && (
-          <div
-            style={{
-              position: "absolute",
-              left: 16,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "var(--ink-300)",
-            }}
-          >
+          <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-300">
             <Icon name={icon} size={18} />
           </div>
         )}
@@ -93,14 +70,7 @@ function Field({ label, icon, children }) {
 function FieldError({ messages }) {
   if (!messages || messages.length === 0) return null;
   return (
-    <div
-      style={{
-        marginTop: 6,
-        fontSize: 12,
-        fontWeight: 700,
-        color: "#9B1C1C",
-      }}
-    >
+    <div className="mt-1.5 text-xs font-bold text-[#9B1C1C]">
       {Array.isArray(messages) ? messages[0] : String(messages)}
     </div>
   );
@@ -108,39 +78,18 @@ function FieldError({ messages }) {
 
 function ProofPill({ icon, value, label }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 4,
-        padding: "12px 18px",
-        background: "white",
-        borderRadius: 18,
-        border: "1px solid var(--line)",
-        boxShadow: "var(--shadow-sm)",
-        minWidth: 96,
-      }}
-    >
-      <div style={{ color: "var(--brand-500)" }}>
+    <div className="flex min-w-24 flex-col items-center gap-1 rounded-[18px] border border-line bg-white px-4.5 py-3 shadow-soft">
+      <div className="text-brand-500">
         <Icon name={icon} size={22} />
       </div>
-      <div
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: 18,
-          color: "var(--ink-900)",
-        }}
-      >
-        {value}
-      </div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink-500)" }}>
-        {label}
-      </div>
+      <div className="font-display text-lg font-bold text-ink-900">{value}</div>
+      <div className="text-[11px] font-bold text-ink-500">{label}</div>
     </div>
   );
 }
+
+const INPUT_CLS =
+  "w-full rounded-[18px] border-2 border-line bg-white py-3.5 pl-11 pr-4 font-body text-[15px] text-ink-700 outline-none transition focus:border-brand-500 focus:shadow-[0_0_0_4px_rgba(245,147,48,0.15)] placeholder:text-ink-300";
 
 export default function AuthPage() {
   const login = useAuthStore((s) => s.login);
@@ -168,15 +117,11 @@ export default function AuthPage() {
     if (!name.trim()) errs.name = ["Nama wajib diisi."];
     else if (name.length > 255) errs.name = ["Nama maksimal 255 karakter."];
     if (!email.trim()) errs.email = ["Email wajib diisi."];
-    if (password.length < 8) {
-      errs.password = ["Kata sandi minimal 8 karakter."];
-    }
-    if (password !== passwordConfirmation) {
+    if (password.length < 8) errs.password = ["Kata sandi minimal 8 karakter."];
+    if (password !== passwordConfirmation)
       errs.password_confirmation = ["Konfirmasi kata sandi tidak cocok."];
-    }
-    if (age !== "" && Number(age) < 5) {
+    if (age !== "" && Number(age) < 5)
       errs.children_age = ["Usia minimal 5 tahun."];
-    }
     return errs;
   }
 
@@ -211,132 +156,41 @@ export default function AuthPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateColumns: "1.1fr 1fr",
-        background: "var(--cream-100)",
-      }}
-    >
+    <div className="grid min-h-screen grid-cols-1 bg-cream-100 lg:grid-cols-[1.1fr_1fr]">
       {/* Left hero */}
-      <div
-        style={{
-          position: "relative",
-          background:
-            "linear-gradient(160deg, #FFE4BC 0%, #FFD09F 60%, #FFB672 100%)",
-          overflow: "hidden",
-          display: "flex",
-        }}
-      >
+      <div className="relative flex overflow-hidden bg-linear-to-br from-[#FFE4BC] via-[#FFD09F] to-[#FFB672]">
         <Sparkles count={18} seed={3} />
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            padding: "48px 56px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 32,
-              left: 56,
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 14,
-                background: "white",
-                display: "grid",
-                placeItems: "center",
-                boxShadow: "var(--shadow-sm)",
-              }}
-            >
+        <div className="relative z-1 flex w-full flex-col items-center justify-center px-14 py-12">
+          <div className="absolute left-14 top-8 flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-[14px] bg-white shadow-soft">
               <Icon name="sparkle-grad" size={26} />
             </div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: 28,
-                color: "var(--brand-700)",
-              }}
-            >
+            <div className="font-display text-[28px] font-bold text-brand-700">
               KICAU
             </div>
           </div>
 
-          <div
-            style={{ position: "relative", marginTop: 36, marginBottom: 16 }}
-          >
-            <div
-              className="anim-float"
-              style={{
-                filter: "drop-shadow(0 12px 18px rgba(245,147,48,0.35))",
-              }}
-            >
+          <div className="relative mb-4 mt-9">
+            <div className="animate-float drop-shadow-[0_12px_18px_rgba(245,147,48,0.35)]">
               <Kimo pose="wave" size={220} />
             </div>
-            <div
-              style={{
-                position: "absolute",
-                top: 30,
-                right: 24,
-                animation: "float 3s ease-in-out infinite",
-              }}
-            >
+            <div className="absolute right-6 top-7.5 animate-float">
               <CoinIcon size={42} />
             </div>
-            <div
-              style={{
-                position: "absolute",
-                bottom: 30,
-                left: 4,
-                animation: "float 4s ease-in-out 0.5s infinite",
-              }}
-            >
+            <div className="absolute bottom-7.5 left-1 animate-float [animation-delay:0.5s]">
               <CoinIcon size={32} />
             </div>
           </div>
 
-          <h1
-            style={{
-              fontSize: 40,
-              lineHeight: 1.1,
-              color: "var(--ink-900)",
-              textAlign: "center",
-              maxWidth: 420,
-            }}
-          >
-            Cerita Cerdas,{" "}
-            <span style={{ color: "var(--brand-500)" }}>Anak Hebat!</span>
+          <h1 className="max-w-105 font-bold text-center text-[40px] leading-[1.1] text-ink-900">
+            Cerita Cerdas, <span className="text-brand-500">Anak Hebat!</span>
           </h1>
-          <p
-            style={{
-              marginTop: 14,
-              fontSize: 16,
-              color: "var(--ink-500)",
-              textAlign: "center",
-              maxWidth: 420,
-              fontWeight: 600,
-            }}
-          >
+          <p className="mt-3.5 max-w-105 text-center text-base font-semibold text-ink-500">
             Belajar literasi finansial sambil bermain bersama Kimo si rubah
             pintar.
           </p>
 
-          <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
+          <div className="mt-8 flex gap-3">
             <ProofPill icon="book" value="500+" label="Cerita seru" />
             <ProofPill icon="medal" value="40" label="Lencana" />
             <ProofPill icon="heart" value="6 nilai" label="Karakter" />
@@ -345,25 +199,9 @@ export default function AuthPage() {
       </div>
 
       {/* Right form */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "48px 56px",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: 440 }}>
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              padding: 6,
-              background: "var(--cream-100)",
-              borderRadius: 999,
-              marginBottom: 22,
-            }}
-          >
+      <div className="flex items-center justify-center px-14 py-12">
+        <div className="w-full max-w-110">
+          <div className="mb-5.5 flex gap-1.5 rounded-full bg-cream-100 p-1.5">
             <SegBtn
               active={mode === "login"}
               onClick={() => switchMode("login")}
@@ -378,72 +216,50 @@ export default function AuthPage() {
             </SegBtn>
           </div>
 
-          <h2 style={{ fontSize: 30, marginBottom: 6 }}>
+          <h2 className="mb-1.5 text-[30px]">
             {mode === "login" ? "Halo lagi! 👋" : "Selamat datang! ✨"}
           </h2>
-          <p
-            style={{
-              color: "var(--ink-500)",
-              fontWeight: 600,
-              marginBottom: 22,
-            }}
-          >
+          <p className="mb-5.5 font-semibold text-ink-500">
             {mode === "login"
               ? "Masuk untuk lanjut petualanganmu."
               : "Buat akun dan mulai bermain dengan Kimo."}
           </p>
 
           {error && (
-            <div
-              style={{
-                background: "#FFE4E4",
-                border: "1px solid #F5B8B8",
-                borderRadius: 12,
-                padding: "12px 16px",
-                marginBottom: 16,
-                color: "#9B1C1C",
-                fontSize: 14,
-                fontWeight: 700,
-              }}
-            >
+            <div className="mb-4 rounded-xl border border-[#F5B8B8] bg-[#FFE4E4] px-4 py-3 text-sm font-bold text-[#9B1C1C]">
               {error}
             </div>
           )}
 
-          <form
-            onSubmit={submit}
-            style={{ display: "flex", flexDirection: "column", gap: 14 }}
-          >
+          <form onSubmit={submit} className="flex flex-col gap-3.5">
             {mode === "register" && (
               <Field label="Nama Anak" icon="user">
                 <input
-                  className="input"
+                  className={INPUT_CLS}
                   placeholder="Misal: Aira"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                   maxLength={255}
-                  style={{ paddingLeft: 46 }}
                 />
                 <FieldError messages={fieldErrors.name} />
               </Field>
             )}
             <Field label="Email Orang Tua" icon="mail">
               <input
-                className="input"
+                className={INPUT_CLS}
                 type="email"
                 placeholder="email@contoh.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 maxLength={255}
-                style={{ paddingLeft: 46 }}
               />
               <FieldError messages={fieldErrors.email} />
             </Field>
             <Field label="Kata Sandi" icon="lock">
               <input
-                className="input"
+                className={INPUT_CLS + " pr-11"}
                 type={showPassword ? "text" : "password"}
                 placeholder={
                   mode === "register" ? "Minimal 8 karakter" : "Kata sandi"
@@ -452,68 +268,52 @@ export default function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={mode === "register" ? 8 : undefined}
-                style={{ paddingLeft: 46, paddingRight: 46 }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: 14,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "transparent",
-                  border: 0,
-                  cursor: "pointer",
-                  padding: 4,
-                }}
                 aria-label="Tampilkan kata sandi"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer border-0 bg-transparent p-1"
               >
-                <Icon name="eye" size={18} color="var(--ink-300)" />
+                <Icon name="eye" size={18} color="var(--color-ink-300)" />
               </button>
               <FieldError messages={fieldErrors.password} />
             </Field>
             {mode === "register" && (
               <Field label="Konfirmasi Kata Sandi" icon="lock">
                 <input
-                  className="input"
+                  className={INPUT_CLS}
                   type={showPassword ? "text" : "password"}
                   placeholder="Ulangi kata sandi"
                   value={passwordConfirmation}
                   onChange={(e) => setPasswordConfirmation(e.target.value)}
                   required
                   minLength={8}
-                  style={{ paddingLeft: 46 }}
                 />
                 <FieldError messages={fieldErrors.password_confirmation} />
               </Field>
             )}
             {mode === "register" && (
               <Field label="Usia Anak">
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {[5, 6, 7, 8, 9, 10, 11].map((a) => (
-                    <button
-                      type="button"
-                      key={a}
-                      onClick={() => setAge(a)}
-                      style={{
-                        border: "2px solid",
-                        borderRadius: 999,
-                        padding: "8px 16px",
-                        fontFamily: "var(--font-body)",
-                        fontWeight: 800,
-                        fontSize: 14,
-                        cursor: "pointer",
-                        transition: "all .15s",
-                        background: age === a ? "var(--brand-500)" : "white",
-                        color: age === a ? "white" : "var(--ink-700)",
-                        borderColor:
-                          age === a ? "var(--brand-500)" : "var(--line)",
-                      }}
-                    >
-                      {a === 11 ? "11+" : a}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-2">
+                  {[5, 6, 7, 8, 9, 10, 11].map((a) => {
+                    const active = age === a;
+                    return (
+                      <button
+                        type="button"
+                        key={a}
+                        onClick={() => setAge(a)}
+                        className={[
+                          "rounded-full border-2 px-4 py-2 font-body text-sm font-extrabold transition",
+                          active
+                            ? "border-brand-500 bg-brand-500 text-white"
+                            : "border-line bg-white text-ink-700",
+                        ].join(" ")}
+                      >
+                        {a === 11 ? "11+" : a}
+                      </button>
+                    );
+                  })}
                 </div>
                 <FieldError messages={fieldErrors.children_age} />
               </Field>
@@ -521,9 +321,8 @@ export default function AuthPage() {
 
             <button
               type="submit"
-              className="btn btn-primary"
               disabled={loading}
-              style={{ marginTop: 8, padding: "16px 22px", fontSize: 16 }}
+              className="mt-2 inline-flex items-center justify-center gap-2.5 rounded-full bg-brand-500 px-5 py-4 font-body text-base font-extrabold text-white shadow-primary transition hover:-translate-y-px hover:bg-brand-600 active:translate-y-0.5 disabled:opacity-60"
             >
               {loading
                 ? "Memuat..."
@@ -534,15 +333,7 @@ export default function AuthPage() {
             </button>
           </form>
 
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: 18,
-              fontSize: 13,
-              color: "var(--ink-500)",
-              fontWeight: 600,
-            }}
-          >
+          <p className="mt-6 text-center text-[13px] font-semibold text-ink-500">
             {mode === "login" ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
             <a
               href="#"
@@ -550,7 +341,7 @@ export default function AuthPage() {
                 e.preventDefault();
                 setMode(mode === "login" ? "register" : "login");
               }}
-              style={{ color: "var(--brand-600)", fontWeight: 800 }}
+              className="font-extrabold text-brand-600"
             >
               {mode === "login" ? "Daftar gratis" : "Masuk di sini"}
             </a>

@@ -112,56 +112,25 @@ export default function AchievementsPage() {
   ];
 
   return (
-    <div className="page">
+    <div className="mx-auto w-full max-w-7xl px-7 pb-20 pt-8">
       {/* Hero */}
-      <div
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          borderRadius: 32,
-          background: "linear-gradient(135deg, #FFE4BC 0%, #FFB672 100%)",
-          border: "1px solid var(--line)",
-          boxShadow: "var(--shadow-md)",
-          marginBottom: 22,
-        }}
-      >
+      <div className="relative mb-5.5 overflow-hidden rounded-[32px] border border-line bg-linear-to-br from-[#FFE4BC] to-[#FFB672] shadow-card">
         <Sparkles count={14} seed={5} />
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            display: "flex",
-            alignItems: "center",
-            gap: 24,
-            padding: "28px 32px",
-          }}
-        >
-          <div className="anim-float">
+        <div className="relative z-1 flex items-center gap-6 px-8 py-7">
+          <div className="animate-float">
             <Kimo pose="celebrate" size={140} />
           </div>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 800,
-                color: "var(--brand-700)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-              }}
-            >
+          <div className="flex-1">
+            <div className="text-xs font-extrabold uppercase tracking-[0.06em] text-brand-700">
               Profil Belajar
             </div>
-            <h1 style={{ fontSize: 36, marginTop: 4 }}>
-              Hebat sekali, {user.name}!
-            </h1>
-            <p
-              style={{ marginTop: 6, color: "var(--ink-500)", fontWeight: 700 }}
-            >
-              Total XP: <span style={{ color: "var(--brand-600)" }}>1,240</span>{" "}
-              · Level 7 · Pembelajar Berlian
+            <h1 className="mt-1 text-4xl">Hebat sekali, {user.name}!</h1>
+            <p className="mt-1.5 font-bold text-ink-500">
+              Total XP: <span className="text-brand-600">1,240</span> · Level 7
+              · Pembelajar Berlian
             </p>
           </div>
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <div className="flex items-center gap-1.5">
             {[1, 2, 3, 4, 5].map((i) => (
               <Icon
                 key={i}
@@ -175,58 +144,24 @@ export default function AchievementsPage() {
       </div>
 
       {/* Stats */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 16,
-        }}
-      >
+      <div className="grid grid-cols-3 gap-4">
         {stats.map((s, i) => (
           <div
             key={i}
-            className="card anim-pop"
-            style={{
-              padding: 22,
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              animationDelay: `${i * 80}ms`,
-            }}
+            className="flex animate-pop-in items-center gap-4 rounded-[24px] border border-line bg-white p-5.5 shadow-card"
+            style={{ animationDelay: `${i * 80}ms` }}
           >
             <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 18,
-                background: `${s.color}22`,
-                display: "grid",
-                placeItems: "center",
-                color: s.color,
-              }}
+              className="grid h-14 w-14 place-items-center rounded-[18px]"
+              style={{ background: `${s.color}22`, color: s.color }}
             >
               <Icon name={s.icon} size={26} />
             </div>
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: 30,
-                  color: "var(--ink-900)",
-                  lineHeight: 1,
-                }}
-              >
+              <div className="font-display text-3xl font-bold leading-none text-ink-900">
                 {s.value}
               </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 800,
-                  color: "var(--ink-500)",
-                  marginTop: 4,
-                }}
-              >
+              <div className="mt-1 text-xs font-extrabold text-ink-500">
                 {s.label}
               </div>
             </div>
@@ -235,73 +170,33 @@ export default function AchievementsPage() {
       </div>
 
       {/* Charts */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.4fr 1fr",
-          gap: 20,
-          marginTop: 22,
-        }}
-      >
-        <div className="card" style={{ padding: 24 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 8,
-            }}
-          >
+      <div className="mt-5.5 grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_1fr]">
+        <div className="rounded-[24px] border border-line bg-white p-6 shadow-card">
+          <div className="mb-2 flex items-center justify-between">
             <div>
-              <h3 style={{ fontSize: 22 }}>Menit Bermain</h3>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: "var(--ink-500)",
-                  marginTop: 4,
-                }}
-              >
-                Hari ini ·{" "}
-                <span style={{ color: "var(--brand-600)" }}>30 menit</span>
+              <h3 className="text-[22px]">Menit Bermain</h3>
+              <div className="mt-1 text-[13px] font-bold text-ink-500">
+                Hari ini · <span className="text-brand-600">30 menit</span>
               </div>
             </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 4,
-                padding: 4,
-                background: "var(--cream-100)",
-                borderRadius: 999,
-              }}
-            >
+            <div className="flex gap-1 rounded-full bg-cream-100 p-1">
               {["hari", "minggu", "bulan"].map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  style={{
-                    border: 0,
-                    padding: "8px 14px",
-                    borderRadius: 999,
-                    cursor: "pointer",
-                    fontFamily: "var(--font-body)",
-                    fontWeight: 800,
-                    fontSize: 12,
-                    textTransform: "capitalize",
-                    background:
-                      period === p ? "var(--brand-500)" : "transparent",
-                    color: period === p ? "white" : "var(--ink-500)",
-                  }}
+                  className={[
+                    "rounded-full border-0 px-3.5 py-2 font-body text-xs font-extrabold capitalize transition",
+                    period === p
+                      ? "bg-brand-500 text-white"
+                      : "bg-transparent text-ink-500",
+                  ].join(" ")}
                 >
                   {p}
                 </button>
               ))}
             </div>
           </div>
-          <svg
-            viewBox={`0 0 ${w} ${h + 30}`}
-            style={{ width: "100%", height: 220, marginTop: 8 }}
-          >
+          <svg viewBox={`0 0 ${w} ${h + 30}`} className="mt-2 h-55 w-full">
             <defs>
               <linearGradient id="areaG" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0" stopColor="#FBA01F" stopOpacity="0.45" />
@@ -387,69 +282,31 @@ export default function AchievementsPage() {
           </svg>
         </div>
 
-        <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 22 }}>Tingkat Kesuksesan</h3>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "var(--ink-500)",
-              marginTop: 4,
-            }}
-          >
+        <div className="rounded-[24px] border border-line bg-white p-6 shadow-card">
+          <h3 className="text-[22px]">Tingkat Kesuksesan</h3>
+          <div className="mt-1 text-[13px] font-bold text-ink-500">
             Per nilai karakter
           </div>
-          <div
-            style={{
-              marginTop: 18,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
+          <div className="mt-4.5 flex flex-col gap-4">
             {successData.map((s, i) => (
               <div key={s.label}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 6,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 800,
-                      fontSize: 14,
-                      color: "var(--ink-700)",
-                    }}
-                  >
+                <div className="mb-1.5 flex justify-between">
+                  <div className="text-sm font-extrabold text-ink-700">
                     {s.label}
                   </div>
                   <div
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 600,
-                      fontSize: 16,
-                      color: s.color,
-                    }}
+                    className="font-display text-base font-semibold"
+                    style={{ color: s.color }}
                   >
                     {Math.round(animPct * s.v)}%
                   </div>
                 </div>
-                <div
-                  style={{
-                    height: 12,
-                    background: "var(--cream-100)",
-                    borderRadius: 999,
-                    overflow: "hidden",
-                  }}
-                >
+                <div className="h-3 overflow-hidden rounded-full bg-cream-100">
                   <div
+                    className="h-full rounded-full"
                     style={{
                       width: `${animPct * s.v}%`,
-                      height: "100%",
                       background: `linear-gradient(90deg, ${s.color}aa, ${s.color})`,
-                      borderRadius: 999,
                       transition: `width 0.8s cubic-bezier(.34,1.56,.64,1) ${i * 100}ms`,
                     }}
                   />
@@ -457,139 +314,65 @@ export default function AchievementsPage() {
               </div>
             ))}
           </div>
-          <div
-            style={{
-              marginTop: 22,
-              padding: 16,
-              background: "linear-gradient(120deg, #FFF1DA, #FFE0B0)",
-              borderRadius: 18,
-              display: "flex",
-              gap: 12,
-              alignItems: "center",
-            }}
-          >
+          <div className="mt-5.5 flex items-center gap-3 rounded-[18px] bg-linear-to-r from-[#FFF1DA] to-[#FFE0B0] p-4">
             <Kimo pose="thinking" size={56} />
-            <div
-              style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-700)" }}
-            >
-              <strong style={{ color: "var(--brand-700)" }}>Tip Kimo:</strong>{" "}
-              Coba cerita bertema "Bijak" minggu ini untuk meningkatkan skornya!
+            <div className="text-[13px] font-bold text-ink-700">
+              <strong className="text-brand-700">Tip Kimo:</strong> Coba cerita
+              bertema "Bijak" minggu ini untuk meningkatkan skornya!
             </div>
           </div>
         </div>
       </div>
 
       {/* Badges */}
-      <div className="card" style={{ padding: 28, marginTop: 24 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 18,
-          }}
-        >
-          <h3 style={{ fontSize: 24 }}>Lencana</h3>
-          <div
-            style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-500)" }}
-          >
+      <div className="mt-6 rounded-[24px] border border-line bg-white p-7 shadow-card">
+        <div className="mb-4.5 flex items-center justify-between">
+          <h3 className="text-2xl">Lencana</h3>
+          <div className="text-[13px] font-bold text-ink-500">
             3 dari 6 diraih
           </div>
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(6, 1fr)",
-            gap: 16,
-          }}
-        >
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {badges.map((b, i) => (
             <div
               key={b.id}
-              className="anim-pop"
+              className={[
+                "flex animate-pop-in flex-col items-center rounded-[22px] border border-line p-4.5",
+                b.earned ? "" : "bg-cream-100 opacity-60",
+              ].join(" ")}
               style={{
-                padding: 18,
-                borderRadius: 22,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                border: "1px solid var(--line)",
                 animationDelay: `${i * 80}ms`,
-                background: b.earned ? b.color : "var(--cream-100)",
-                opacity: b.earned ? 1 : 0.6,
+                background: b.earned ? b.color : undefined,
               }}
             >
               <div
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: "50%",
-                  background: "white",
-                  display: "grid",
-                  placeItems: "center",
-                  position: "relative",
-                  boxShadow: b.earned ? "0 6px 0 rgba(122,69,42,0.1)" : "none",
-                }}
+                className={[
+                  "relative grid h-16 w-16 place-items-center rounded-full bg-white",
+                  b.earned ? "shadow-[0_6px_0_rgba(122,69,42,0.1)]" : "",
+                ].join(" ")}
               >
                 <Icon
                   name={b.icon}
                   size={28}
-                  color={b.earned ? "var(--brand-600)" : "var(--ink-300)"}
+                  color={
+                    b.earned ? "var(--color-brand-600)" : "var(--color-ink-300)"
+                  }
                 />
                 {b.earned && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: -4,
-                      right: -4,
-                      width: 22,
-                      height: 22,
-                      borderRadius: "50%",
-                      background: "#7DBA6F",
-                      display: "grid",
-                      placeItems: "center",
-                      border: "2px solid white",
-                    }}
-                  >
+                  <div className="absolute -right-1 -top-1 grid h-5.5 w-5.5 place-items-center rounded-full border-2 border-white bg-[#7DBA6F]">
                     <Icon name="check" size={12} color="white" />
                   </div>
                 )}
                 {!b.earned && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: "50%",
-                      display: "grid",
-                      placeItems: "center",
-                      background: "rgba(255,255,255,0.7)",
-                    }}
-                  >
-                    <Icon name="lock" size={20} color="var(--ink-300)" />
+                  <div className="absolute inset-0 grid place-items-center rounded-full bg-white/70">
+                    <Icon name="lock" size={20} color="var(--color-ink-300)" />
                   </div>
                 )}
               </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 600,
-                  fontSize: 14,
-                  color: "var(--ink-900)",
-                  textAlign: "center",
-                  marginTop: 10,
-                }}
-              >
+              <div className="mt-2.5 text-center font-display text-sm font-semibold text-ink-900">
                 {b.name}
               </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "var(--ink-500)",
-                  textAlign: "center",
-                  marginTop: 4,
-                }}
-              >
+              <div className="mt-1 text-center text-[11px] font-bold text-ink-500">
                 {b.desc}
               </div>
             </div>
