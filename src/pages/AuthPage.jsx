@@ -90,6 +90,22 @@ function Field({ label, icon, children }) {
   );
 }
 
+function FieldError({ messages }) {
+  if (!messages || messages.length === 0) return null;
+  return (
+    <div
+      style={{
+        marginTop: 6,
+        fontSize: 12,
+        fontWeight: 700,
+        color: "#9B1C1C",
+      }}
+    >
+      {Array.isArray(messages) ? messages[0] : String(messages)}
+    </div>
+  );
+}
+
 function ProofPill({ icon, value, label }) {
   return (
     <div
@@ -128,27 +144,68 @@ function ProofPill({ icon, value, label }) {
 
 export default function AuthPage() {
   const login = useAuthStore((s) => s.login);
+  const register = useAuthStore((s) => s.register);
   const loading = useAuthStore((s) => s.loading);
   const navigate = useNavigate();
   const [mode, setMode] = useState("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [age, setAge] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  function switchMode(next) {
+    setMode(next);
+    setError(null);
+    setFieldErrors({});
+  }
+
+  function clientValidateRegister() {
+    const errs = {};
+    if (!name.trim()) errs.name = ["Nama wajib diisi."];
+    else if (name.length > 255) errs.name = ["Nama maksimal 255 karakter."];
+    if (!email.trim()) errs.email = ["Email wajib diisi."];
+    if (password.length < 8) {
+      errs.password = ["Kata sandi minimal 8 karakter."];
+    }
+    if (password !== passwordConfirmation) {
+      errs.password_confirmation = ["Konfirmasi kata sandi tidak cocok."];
+    }
+    if (age !== "" && Number(age) < 5) {
+      errs.children_age = ["Usia minimal 5 tahun."];
+    }
+    return errs;
+  }
 
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
-    if (mode !== "login") {
-      setError("Pendaftaran belum tersedia. Silakan masuk dulu.");
-      return;
-    }
+    setFieldErrors({});
     try {
-      await login({ email, password });
+      if (mode === "login") {
+        await login({ email, password });
+      } else {
+        const errs = clientValidateRegister();
+        if (Object.keys(errs).length > 0) {
+          setFieldErrors(errs);
+          return;
+        }
+        await register({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          password_confirmation: passwordConfirmation,
+          children_age: age === "" ? undefined : Number(age),
+        });
+      }
       navigate("/", { replace: true });
     } catch (err) {
+      if (err.errors && typeof err.errors === "object") {
+        setFieldErrors(err.errors);
+      }
       setError(err.message);
     }
   };
@@ -307,12 +364,15 @@ export default function AuthPage() {
               marginBottom: 22,
             }}
           >
-            <SegBtn active={mode === "login"} onClick={() => setMode("login")}>
+            <SegBtn
+              active={mode === "login"}
+              onClick={() => switchMode("login")}
+            >
               Masuk
             </SegBtn>
             <SegBtn
               active={mode === "register"}
-              onClick={() => setMode("register")}
+              onClick={() => switchMode("register")}
             >
               Daftar
             </SegBtn>
@@ -362,8 +422,10 @@ export default function AuthPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  maxLength={255}
                   style={{ paddingLeft: 46 }}
                 />
+                <FieldError messages={fieldErrors.name} />
               </Field>
             )}
             <Field label="Email Orang Tua" icon="mail">
@@ -374,17 +436,22 @@ export default function AuthPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                maxLength={255}
                 style={{ paddingLeft: 46 }}
               />
+              <FieldError messages={fieldErrors.email} />
             </Field>
             <Field label="Kata Sandi" icon="lock">
               <input
                 className="input"
                 type={showPassword ? "text" : "password"}
-                placeholder="Minimal 6 karakter"
+                placeholder={
+                  mode === "register" ? "Minimal 8 karakter" : "Kata sandi"
+                }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={mode === "register" ? 8 : undefined}
                 style={{ paddingLeft: 46, paddingRight: 46 }}
               />
               <button
@@ -404,11 +471,27 @@ export default function AuthPage() {
               >
                 <Icon name="eye" size={18} color="var(--ink-300)" />
               </button>
+              <FieldError messages={fieldErrors.password} />
             </Field>
+            {mode === "register" && (
+              <Field label="Konfirmasi Kata Sandi" icon="lock">
+                <input
+                  className="input"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Ulangi kata sandi"
+                  value={passwordConfirmation}
+                  onChange={(e) => setPasswordConfirmation(e.target.value)}
+                  required
+                  minLength={8}
+                  style={{ paddingLeft: 46 }}
+                />
+                <FieldError messages={fieldErrors.password_confirmation} />
+              </Field>
+            )}
             {mode === "register" && (
               <Field label="Usia Anak">
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {[5, 6, 7, 8, 9, 10, "11+"].map((a) => (
+                  {[5, 6, 7, 8, 9, 10, 11].map((a) => (
                     <button
                       type="button"
                       key={a}
@@ -428,45 +511,12 @@ export default function AuthPage() {
                           age === a ? "var(--brand-500)" : "var(--line)",
                       }}
                     >
-                      {a}
+                      {a === 11 ? "11+" : a}
                     </button>
                   ))}
                 </div>
+                <FieldError messages={fieldErrors.children_age} />
               </Field>
-            )}
-
-            {mode === "login" && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginTop: 4,
-                }}
-              >
-                <label
-                  style={{
-                    display: "inline-flex",
-                    gap: 8,
-                    alignItems: "center",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    color: "var(--ink-500)",
-                  }}
-                >
-                  <input type="checkbox" defaultChecked /> Ingatkan saya
-                </label>
-                <a
-                  href="#"
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: "var(--brand-600)",
-                  }}
-                >
-                  Lupa sandi?
-                </a>
-              </div>
             )}
 
             <button
@@ -481,29 +531,6 @@ export default function AuthPage() {
                   ? "Masuk & Bermain"
                   : "Buat Akun"}
               {!loading && <Icon name="sparkle-grad" size={18} />}
-            </button>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                margin: "8px 0",
-                color: "var(--ink-300)",
-                fontWeight: 700,
-                fontSize: 12,
-                justifyContent: "center",
-              }}
-            >
-              <span>atau</span>
-            </div>
-
-            <button
-              type="button"
-              className="btn btn-ghost"
-              style={{ background: "white" }}
-            >
-              <Icon name="google" size={18} /> Lanjut dengan Google
             </button>
           </form>
 
