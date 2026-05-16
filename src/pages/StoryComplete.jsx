@@ -1,20 +1,36 @@
+import { useMemo } from 'react';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Kimo from '../components/Kimo';
 import Icon from '../components/Icon';
 
-export default function StoryComplete({ result, onHome, onNew }) {
-  const { story, value } = result;
+const CONFETTI_COLORS = ["#FCD968", "#F08A2E", "#E66B85", "#6F62C8", "#7DBA6F", "#FFC2CB"];
 
-  const confetti = Array.from({ length: 40 }).map((_, i) => {
-    const colors = ["#FCD968", "#F08A2E", "#E66B85", "#6F62C8", "#7DBA6F", "#FFC2CB"];
-    const x = Math.random() * 100;
-    const dur = 3 + Math.random() * 3;
-    const delay = Math.random() * 2;
-    const size = 6 + Math.random() * 10;
-    const c = colors[i % colors.length];
-    return (
-      <div key={i} style={{ position: "absolute", top: -20, left: x + "%", width: size, height: size * 0.4, background: c, borderRadius: 2, animation: `confetti-fall ${dur}s linear ${delay}s infinite` }}/>
-    );
-  });
+function makeConfettiPieces(count) {
+  return Array.from({ length: count }, (_, i) => ({
+    key: i,
+    x: Math.random() * 100,
+    dur: 3 + Math.random() * 3,
+    delay: Math.random() * 2,
+    size: 6 + Math.random() * 10,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  }));
+}
+
+export default function StoryComplete() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const result = location.state?.result;
+  const pieces = useMemo(() => makeConfettiPieces(40), []);
+
+  if (!result) return <Navigate to="/" replace/>;
+
+  const { story, value } = result;
+  const onHome = () => navigate('/');
+  const onNew = () => navigate('/');
+
+  const confetti = pieces.map((p) => (
+    <div key={p.key} style={{ position: "absolute", top: -20, left: p.x + "%", width: p.size, height: p.size * 0.4, background: p.color, borderRadius: 2, animation: `confetti-fall ${p.dur}s linear ${p.delay}s infinite` }}/>
+  ));
 
   return (
     <div style={{ position: "relative", minHeight: "calc(100vh - 80px)" }}>
