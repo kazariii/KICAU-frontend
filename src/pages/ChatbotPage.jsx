@@ -3,7 +3,8 @@ import Icon from "../components/Icon";
 import Kimo from "../components/Kimo";
 import { useAuthStore } from "../store/authStore";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://kicau-api.jevvonn.foo/api";
 
 function nowTime() {
   const d = new Date();

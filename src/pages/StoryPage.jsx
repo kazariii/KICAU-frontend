@@ -5,7 +5,8 @@ import Kimo from "../components/Kimo";
 import { Sparkles, Cloud } from "../components/Sparkles";
 import { useAuthStore } from "../store/authStore";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://kicau-api.jevvonn.foo/api";
 
 function fallbackStory() {
   return {

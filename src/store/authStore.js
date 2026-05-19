@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://kicau-api.jevvonn.foo/api";
 
 async function postJson(path, body) {
   const res = await fetch(`${API_URL}${path}`, {
@@ -88,6 +89,6 @@ export const useAuthStore = create(
       name: "kicau-auth",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ user: state.user, token: state.token }),
-    }
-  )
+    },
+  ),
 );
