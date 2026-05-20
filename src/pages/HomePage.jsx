@@ -105,7 +105,6 @@ export default function HomePage() {
   const [idea, setIdea] = useState("");
   const [theme, setTheme] = useState(null);
   const [moral, setMoral] = useState(null);
-  const [length, setLength] = useState("sedang");
   const [recording, setRecording] = useState(false);
 
   const dailyChallenge = {
@@ -115,11 +114,11 @@ export default function HomePage() {
     reward: 25,
   };
 
-  const canSubmit = idea.trim().length > 4 || theme;
+  const canSubmit = !!theme && !!moral;
   const submit = () => {
     if (!canSubmit) return;
     navigate("/story", {
-      state: { params: { idea: idea.trim(), theme, moral, length } },
+      state: { params: { idea: idea.trim(), theme, moral } },
     });
   };
 
@@ -262,37 +261,6 @@ export default function HomePage() {
                       <span className="font-display text-sm font-medium text-ink-900">
                         {m.label}
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Length picker */}
-            <div className="mt-5">
-              <div className="mb-3 font-display text-base font-semibold text-ink-900">
-                Panjang Cerita:
-              </div>
-              <div className="flex w-fit gap-2 rounded-full bg-cream-100 p-1.5">
-                {["pendek", "sedang", "panjang"].map((l) => {
-                  const active = length === l;
-                  return (
-                    <button
-                      key={l}
-                      onClick={() => setLength(l)}
-                      className={[
-                        "rounded-full border-0 px-4.5 py-2.5 font-body text-[13px] font-extrabold capitalize transition",
-                        active
-                          ? "bg-white text-brand-700 shadow-soft"
-                          : "bg-transparent text-ink-500",
-                      ].join(" ")}
-                      style={{ padding: "10px 18px" }}
-                    >
-                      {l === "pendek"
-                        ? "🪶 Pendek"
-                        : l === "sedang"
-                          ? "📖 Sedang"
-                          : "📚 Panjang"}
                     </button>
                   );
                 })}

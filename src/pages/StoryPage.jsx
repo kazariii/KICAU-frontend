@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation, Navigate } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  useParams,
+  Navigate,
+} from "react-router-dom";
 import Icon from "../components/Icon";
 import Kimo from "../components/Kimo";
 import { Sparkles, Cloud } from "../components/Sparkles";
@@ -8,175 +13,57 @@ import { useAuthStore } from "../store/authStore";
 const API_URL =
   import.meta.env.VITE_API_URL || "https://kicau-api.jevvonn.foo/api";
 
-function fallbackStory() {
-  return {
-    title: "Si Kelinci Jujur",
-    summary: "Kimo dan Lulu belajar tentang kejujuran di pasar.",
-    pages: [
-      {
-        type: "narration",
-        text: "Suatu hari, Kimo berjualan pisang di tepi jalan. Hari itu cerah dan ramai.",
-        scene: "pasar",
-      },
-      {
-        type: "narration",
-        text: "Lulu si kelinci datang ingin membeli 3 buah pisang. Ia mengeluarkan uangnya.",
-        scene: "pasar",
-      },
-      {
-        type: "choice",
-        question: "Lulu memberi uang lebih. Apa yang harus Kimo lakukan?",
-        options: [
-          {
-            text: "Mengembalikan kelebihan uangnya.",
-            correct: true,
-            feedback: "Tepat! Kejujuran selalu lebih berharga dari uang.",
-          },
-          {
-            text: "Diam saja, lumayan dapat untung.",
-            correct: false,
-            feedback: "Itu tidak jujur. Lulu pasti sedih.",
-          },
-        ],
-        scene: "pasar",
-      },
-      {
-        type: "narration",
-        text: "Kimo mengembalikan uangnya. Lulu tersenyum dan mengucapkan terima kasih.",
-        scene: "pasar",
-      },
-      {
-        type: "choice",
-        question:
-          "Sore harinya, Kimo menemukan dompet di jalan. Apa yang Kimo lakukan?",
-        options: [
-          {
-            text: "Mencari pemiliknya dan mengembalikannya.",
-            correct: true,
-            feedback: "Hebat! Kimo sungguh anak yang jujur.",
-          },
-          {
-            text: "Menyimpannya untuk diri sendiri.",
-            correct: false,
-            feedback: "Tidak baik. Pemiliknya pasti khawatir.",
-          },
-        ],
-        scene: "jalan",
-      },
-      {
-        type: "narration",
-        text: "Kimo pulang dengan hati bahagia. Kejujuran membuatnya jadi pahlawan kecil hari itu.",
-        scene: "rumah",
-      },
-    ],
-    lesson:
-      "Kejujuran adalah berkata benar dan tidak mengambil yang bukan miliknya.",
-    value: "Kejujuran",
-  };
-}
+const THEME_LABELS = {
+  sekolah: "Sekolah",
+  fantasi: "Fantasi",
+  belanja: "Belanja",
+  jelajah: "Jelajah",
+};
+const MORAL_LABELS = {
+  menabung: "Menabung",
+  kejujuran: "Kejujuran",
+  bijak: "Bijak",
+  berbagi: "Berbagi",
+};
 
-function SceneArt({ scene }) {
-  const palettes = {
-    pasar: { sky: "#FFE4BC", ground: "#F5B872", accent: "#FCD968" },
-    hutan: { sky: "#D7EBD2", ground: "#8FBE85", accent: "#FCD968" },
-    sekolah: { sky: "#FFE0E8", ground: "#F5B0BE", accent: "#FCD968" },
-    rumah: { sky: "#E8DDF8", ground: "#BAACE0", accent: "#FCD968" },
-    jalan: { sky: "#FFE4BC", ground: "#E8B070", accent: "#FCD968" },
-    sungai: { sky: "#CDE7F5", ground: "#7AB8DC", accent: "#FCD968" },
-  };
-  const p = palettes[scene] || palettes.pasar;
+function SceneArt({ imageUrl, seed = 0 }) {
+  if (imageUrl) {
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={imageUrl}
+          alt=""
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+        <Sparkles count={4} seed={seed} />
+        <div className="absolute inset-x-0 bottom-0 h-7.5 bg-linear-to-b from-transparent to-black/10" />
+      </div>
+    );
+  }
   return (
     <div
       className="absolute inset-0 overflow-hidden"
       style={{
-        background: `linear-gradient(180deg, ${p.sky} 0%, ${p.sky} 60%, ${p.ground} 100%)`,
+        background:
+          "linear-gradient(180deg, #FFE4BC 0%, #FFE4BC 60%, #F5B872 100%)",
       }}
     >
-      <div
-        className="absolute right-20 top-15 h-20 w-20 rounded-full"
-        style={{ background: p.accent, boxShadow: `0 0 80px ${p.accent}` }}
-      />
       <div className="absolute left-20 top-10">
         <Cloud size={70} color="rgba(255,255,255,0.85)" />
       </div>
       <div className="absolute left-[55%] top-25">
         <Cloud size={50} color="rgba(255,255,255,0.65)" />
       </div>
-      <svg
-        viewBox="0 0 800 400"
-        className="absolute bottom-0 h-[60%] w-full"
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M0 240 C 120 200 240 260 360 220 C 480 180 600 240 800 200 L 800 400 L 0 400 Z"
-          fill={p.ground}
-          opacity="0.7"
-        />
-        <path
-          d="M0 300 C 150 270 300 320 450 290 C 600 260 700 310 800 280 L 800 400 L 0 400 Z"
-          fill={p.ground}
-        />
-      </svg>
-      {scene === "pasar" && (
-        <svg
-          viewBox="0 0 800 400"
-          className="absolute bottom-0 h-[70%] w-full"
-          preserveAspectRatio="xMidYEnd meet"
-        >
-          <rect
-            x="500"
-            y="180"
-            width="240"
-            height="160"
-            rx="10"
-            fill="#E47A17"
-          />
-          <path d="M480 180 L760 180 L740 140 L500 140 Z" fill="#F08A2E" />
-          <rect x="540" y="220" width="60" height="80" fill="#FFE4BC" />
-          <rect x="640" y="220" width="60" height="80" fill="#FFE4BC" />
-        </svg>
-      )}
-      {scene === "hutan" && (
-        <svg
-          viewBox="0 0 800 400"
-          className="absolute bottom-0 h-[80%] w-full"
-          preserveAspectRatio="xMidYEnd meet"
-        >
-          {[120, 220, 600, 700].map((x, i) => (
-            <g key={i}>
-              <rect
-                x={x}
-                y={i % 2 ? 220 : 200}
-                width="14"
-                height="120"
-                fill="#7A4A20"
-              />
-              <circle cx={x + 7} cy={i % 2 ? 200 : 180} r="50" fill="#5FA055" />
-            </g>
-          ))}
-        </svg>
-      )}
-      {scene === "sekolah" && (
-        <svg
-          viewBox="0 0 800 400"
-          className="absolute bottom-0 h-[70%] w-full"
-          preserveAspectRatio="xMidYEnd meet"
-        >
-          <rect
-            x="280"
-            y="180"
-            width="240"
-            height="160"
-            fill="#FFE4BC"
-            stroke="#3A1F12"
-            strokeWidth="3"
-          />
-          <path d="M260 180 L540 180 L500 130 L300 130 Z" fill="#F08A2E" />
-          <rect x="380" y="240" width="40" height="100" fill="#3A1F12" />
-          <circle cx="400" cy="160" r="14" fill="#FCD968" />
-        </svg>
-      )}
-      <Sparkles count={6} seed={scene.length} />
+      <div className="absolute inset-0 grid place-items-center">
+        <div className="flex flex-col items-center gap-3 text-ink-500">
+          <div className="animate-spin-slow">
+            <Icon name="sparkle-grad" size={40} />
+          </div>
+          <div className="text-sm font-extrabold">Ilustrasi belum siap...</div>
+        </div>
+      </div>
+      <Sparkles count={6} seed={seed} />
       <div className="absolute inset-x-0 bottom-0 h-7.5 bg-linear-to-b from-transparent to-black/10" />
     </div>
   );
@@ -189,7 +76,7 @@ const LOADING_TIPS = [
   "Hampir selesai!",
 ];
 
-function StoryLoading() {
+function StoryLoading({ progress }) {
   const [tip, setTip] = useState(0);
   useEffect(() => {
     const id = setInterval(
@@ -200,7 +87,7 @@ function StoryLoading() {
   }, []);
   return (
     <div className="grid min-h-[calc(100vh-80px)] place-items-center p-8">
-      <div className="max-w-120 text-center">
+      <div className="max-w-140 text-center">
         <div className="relative inline-block">
           <div className="animate-float">
             <Kimo pose="thinking" size={180} />
@@ -219,6 +106,21 @@ function StoryLoading() {
         >
           {LOADING_TIPS[tip]}
         </p>
+        {progress?.message && (
+          <p className="mt-3 text-[13px] font-extrabold text-brand-700">
+            {progress.message}
+          </p>
+        )}
+        {progress?.total > 0 && (
+          <div className="mx-auto mt-4 h-2 w-full max-w-80 overflow-hidden rounded-full bg-white/60">
+            <div
+              className="h-full rounded-full bg-linear-to-r from-brand-300 to-brand-500 transition-[width] duration-500"
+              style={{
+                width: `${Math.min(100, ((progress.step || 0) / progress.total) * 100)}%`,
+              }}
+            />
+          </div>
+        )}
         <div className="mt-6 flex justify-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (
             <div
@@ -235,115 +137,329 @@ function StoryLoading() {
   );
 }
 
-export default function StoryPage() {
+function StoryGenerator({ params }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const token = useAuthStore((s) => s.token);
-  const params = location.state?.params;
-  const [status, setStatus] = useState("loading");
-  const [story, setStory] = useState(null);
-  const [page, setPage] = useState(0);
-  const [choiceFeedback, setChoiceFeedback] = useState(null);
+  const [progress, setProgress] = useState({ message: "Menyusun cerita..." });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!params) return;
     let cancelled = false;
+    let eventSource = null;
 
-    async function generate() {
-      setStatus("loading");
+    async function run() {
       try {
-        const themeLabels = {
-          sekolah: "Sekolah",
-          fantasi: "Fantasi",
-          belanja: "Belanja",
-          jelajah: "Jelajah",
-        };
-        const moralLabels = {
-          menabung: "Menabung",
-          kejujuran: "Kejujuran",
-          bijak: "Bijak/bijaksana mengelola uang",
-          berbagi: "Berbagi",
-        };
-        const lengthMap = { pendek: 4, sedang: 6, panjang: 8 };
-        const numPages = lengthMap[params.length || "sedang"];
-        const themeText = params.theme
-          ? themeLabels[params.theme]
-          : "petualangan ringan";
-        const moralText = params.moral
-          ? moralLabels[params.moral]
-          : "literasi finansial dasar";
-        const ideaText =
+        const storyIdeaText = THEME_LABELS[params.theme] || "Fantasi";
+        const moralText = MORAL_LABELS[params.moral] || "Berbagi";
+        const promptText =
           params.idea && params.idea.length > 4
             ? params.idea
             : "petualangan Kimo si rubah dan teman-temannya";
 
-        const prompt = `Kamu adalah pengarang cerita anak Indonesia untuk usia 5-10 tahun. Buat cerita interaktif dengan tema: ${themeText}, mengajarkan nilai: ${moralText}. Ide cerita: ${ideaText}. Tokoh utama: Kimo (rubah oranye yang ramah). Bahasa: Indonesia sederhana, kalimat pendek, hangat. KEMBALIKAN DALAM JSON SAJA, tanpa markdown. Format: { "title": "...", "summary": "...", "pages": [{ "type": "narration", "text": "...", "scene": "pasar/hutan/sekolah/rumah/jalan/sungai" } atau { "type": "choice", "question": "...", "options": [{ "text": "...", "correct": true, "feedback": "..." }] }], "lesson": "...", "value": "..." }. Buat tepat ${numPages} halaman dengan minimal 2 halaman bertipe "choice". Akhiri dengan narasi positif.`;
+        setProgress({ message: "Menyusun cerita..." });
 
-        const res = await fetch(`${API_URL}/chatbot/chat`, {
+        const res = await fetch(`${API_URL}/stories`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ message: prompt }),
+          body: JSON.stringify({
+            prompt: promptText,
+            nilai_moral: moralText,
+            story_idea: storyIdeaText,
+          }),
         });
-        const data = await res.json();
-        const text = data.reply || data.message || "";
-        const jsonStart = text.indexOf("{");
-        const jsonEnd = text.lastIndexOf("}");
-        if (jsonStart < 0 || jsonEnd < 0)
-          throw new Error("Format tidak terbaca");
-        const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
-        if (!cancelled) setStory(parsed);
-      } catch {
-        if (!cancelled) setStory(fallbackStory());
-      }
-      if (!cancelled) {
-        setPage(0);
-        setStatus("reading");
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.message || "Gagal membuat cerita.");
+        }
+
+        const story = await res.json();
+        if (cancelled) return;
+
+        setProgress({
+          message: "Cerita siap! Membuat ilustrasi...",
+          step: 0,
+          total: 0,
+        });
+
+        const sseUrl = `${API_URL}/stories/${story.id}/generate-images?token=${encodeURIComponent(token)}`;
+        eventSource = new EventSource(sseUrl);
+
+        const localStory = { ...story, story: [...(story.story || [])] };
+
+        eventSource.addEventListener("start", (e) => {
+          const data = JSON.parse(e.data);
+          setProgress({
+            message: `Membuat ${data.total} ilustrasi...`,
+            step: 0,
+            total: data.total,
+          });
+        });
+
+        eventSource.addEventListener("progress", (e) => {
+          const data = JSON.parse(e.data);
+          setProgress((p) => ({
+            ...p,
+            message: data.message || p.message,
+            total: data.total ?? p.total,
+          }));
+        });
+
+        eventSource.addEventListener("image_ready", (e) => {
+          const data = JSON.parse(e.data);
+          const idx = localStory.story.findIndex(
+            (it) => it.order_index === data.order_index,
+          );
+          if (idx >= 0) {
+            localStory.story[idx] = {
+              ...localStory.story[idx],
+              image_url: data.image_url,
+            };
+          }
+          setProgress((p) => ({
+            ...p,
+            message: `Ilustrasi ${data.step}/${data.total} siap.`,
+            step: data.step,
+            total: data.total,
+          }));
+        });
+
+        eventSource.addEventListener("image_failed", (e) => {
+          const data = JSON.parse(e.data);
+          setProgress((p) => ({
+            ...p,
+            message: data.message || `Ilustrasi ${data.step} gagal.`,
+            step: data.step ?? p.step,
+            total: data.total ?? p.total,
+          }));
+        });
+
+        eventSource.addEventListener("done", () => {
+          eventSource?.close();
+          if (cancelled) return;
+          navigate(`/story/${story.id}`, {
+            replace: true,
+            state: { story: localStory },
+          });
+        });
+
+        eventSource.addEventListener("error", () => {
+          eventSource?.close();
+          if (cancelled) return;
+          navigate(`/story/${story.id}`, {
+            replace: true,
+            state: { story: localStory },
+          });
+        });
+
+        eventSource.onerror = () => {
+          eventSource?.close();
+          if (cancelled) return;
+          navigate(`/story/${story.id}`, {
+            replace: true,
+            state: { story: localStory },
+          });
+        };
+      } catch (e) {
+        if (!cancelled) setError(e.message || "Terjadi kesalahan.");
       }
     }
 
-    generate();
+    run();
+
+    return () => {
+      cancelled = true;
+      eventSource?.close();
+    };
+  }, [params, token, navigate]);
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl px-7 py-8 text-center">
+        <h2 className="text-xl font-bold text-ink-900">Terjadi kesalahan</h2>
+        <p className="mt-2 text-ink-500">{error}</p>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-4 rounded-full bg-brand-500 px-5 py-2.5 font-extrabold text-white"
+        >
+          Kembali
+        </button>
+      </div>
+    );
+  }
+
+  return <StoryLoading progress={progress} />;
+}
+
+function StoryViewer({ storyId }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const token = useAuthStore((s) => s.token);
+  const [story, setStory] = useState(location.state?.story || null);
+  const [loading, setLoading] = useState(!location.state?.story);
+  const [page, setPage] = useState(0);
+  const [choiceFeedback, setChoiceFeedback] = useState(null);
+  const [imageProgress, setImageProgress] = useState(null);
+
+  useEffect(() => {
+    if (story) return;
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`${API_URL}/stories/${storyId}`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error("Gagal memuat cerita.");
+        const data = await res.json();
+        if (!cancelled) setStory(data);
+      } catch {
+        if (!cancelled) setStory(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
     return () => {
       cancelled = true;
     };
-  }, [params, token]);
+  }, [storyId, token, story]);
 
-  if (!params) return <Navigate to="/" replace />;
+  const items = story?.story || [];
+  const allImagesMissing =
+    items.length > 0 && items.every((it) => !it.image_url);
 
-  const onBack = () => navigate("/");
+  useEffect(() => {
+    if (!story || !allImagesMissing) return;
 
-  if (status === "loading") return <StoryLoading />;
+    let cancelled = false;
+    const sseUrl = `${API_URL}/stories/${storyId}/generate-images?token=${encodeURIComponent(token)}`;
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener("start", (e) => {
+      const data = JSON.parse(e.data);
+      if (cancelled) return;
+      setImageProgress({
+        message: `Membuat ${data.total} ilustrasi...`,
+        step: 0,
+        total: data.total,
+      });
+    });
+
+    eventSource.addEventListener("progress", (e) => {
+      const data = JSON.parse(e.data);
+      if (cancelled) return;
+      setImageProgress((p) => ({
+        ...(p || {}),
+        message: data.message || p?.message,
+        total: data.total ?? p?.total,
+      }));
+    });
+
+    eventSource.addEventListener("image_ready", (e) => {
+      const data = JSON.parse(e.data);
+      if (cancelled) return;
+      setStory((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          story: prev.story.map((it) =>
+            it.order_index === data.order_index
+              ? { ...it, image_url: data.image_url }
+              : it,
+          ),
+        };
+      });
+      setImageProgress({
+        message: `Ilustrasi ${data.step}/${data.total} siap.`,
+        step: data.step,
+        total: data.total,
+      });
+    });
+
+    eventSource.addEventListener("image_failed", (e) => {
+      const data = JSON.parse(e.data);
+      if (cancelled) return;
+      setImageProgress((p) => ({
+        ...(p || {}),
+        message: data.message || `Ilustrasi ${data.step} gagal.`,
+        step: data.step ?? p?.step,
+        total: data.total ?? p?.total,
+      }));
+    });
+
+    eventSource.addEventListener("done", () => {
+      eventSource.close();
+      if (cancelled) return;
+      setImageProgress(null);
+    });
+
+    eventSource.onerror = () => {
+      eventSource.close();
+      if (cancelled) return;
+      setImageProgress(null);
+    };
+
+    return () => {
+      cancelled = true;
+      eventSource.close();
+    };
+  }, [story, allImagesMissing, storyId, token]);
+
+  if (loading)
+    return <StoryLoading progress={{ message: "Memuat cerita..." }} />;
   if (!story)
     return (
       <div className="mx-auto max-w-7xl px-7 py-8">
-        Terjadi kesalahan. <button onClick={onBack}>Kembali</button>
+        Cerita tidak ditemukan.{" "}
+        <button onClick={() => navigate("/")}>Kembali</button>
       </div>
     );
 
-  const totalPages = story.pages.length;
-  const current = story.pages[page];
+  const totalPages = items.length;
+  const current = items[page];
   const isLast = page >= totalPages - 1;
+
+  const onBack = () => navigate("/");
 
   function next() {
     if (isLast) {
       navigate("/story/complete", {
-        state: { result: { story, value: story.value || params.moral } },
+        state: {
+          result: {
+            story: {
+              ...story,
+              lesson: story.moral_message,
+            },
+            value: story.title,
+          },
+        },
       });
     } else {
       setPage(page + 1);
       setChoiceFeedback(null);
     }
   }
+
   function pickChoice(opt) {
-    setChoiceFeedback({ correct: opt.correct, msg: opt.feedback });
+    setChoiceFeedback({
+      correct: !!opt.is_correct,
+      msg: opt.is_correct
+        ? "Pilihan yang baik!"
+        : "Yuk pikir lagi sebelum melanjutkan.",
+    });
   }
+
+  const hasQuestion = !!current?.question;
 
   return (
     <div className="min-h-[calc(100vh-80px)] px-6 pb-6">
-      {/* Top bar */}
       <div className="mx-auto flex max-w-245 items-center gap-3 py-4">
         <button
           onClick={onBack}
@@ -357,7 +473,7 @@ export default function StoryPage() {
             {story.title}
           </div>
           <div className="mt-2 flex gap-1">
-            {story.pages.map((_, i) => (
+            {items.map((_, i) => (
               <div
                 key={i}
                 className={[
@@ -379,37 +495,57 @@ export default function StoryPage() {
         </div>
       </div>
 
-      {/* Scene */}
+      {imageProgress && (
+        <div className="mx-auto mb-3 flex max-w-245 items-center gap-3 rounded-full border border-line bg-white px-4 py-2 shadow-soft">
+          <div className="animate-spin-slow text-brand-500">
+            <Icon name="sparkle-grad" size={18} />
+          </div>
+          <div className="flex-1 text-[13px] font-extrabold text-brand-700">
+            {imageProgress.message}
+          </div>
+          {imageProgress.total > 0 && (
+            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-cream-50">
+              <div
+                className="h-full rounded-full bg-linear-to-r from-brand-300 to-brand-500 transition-[width] duration-500"
+                style={{
+                  width: `${Math.min(100, ((imageProgress.step || 0) / imageProgress.total) * 100)}%`,
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       <div
         key={page}
         className="relative mx-auto flex h-[min(680px,calc(100vh-200px))] min-h-135 max-w-245 animate-pop-in flex-col justify-between overflow-hidden rounded-[36px] border border-line shadow-pop"
       >
-        <SceneArt scene={current.scene || (page % 2 ? "hutan" : "pasar")} />
+        <SceneArt imageUrl={current?.image_url} seed={page} />
 
-        <div className="relative z-2 m-6 mb-0">
-          {!current.type || current.type === "narration" ? (
-            <div className="max-w-140 rounded-3xl border border-line bg-white px-6 py-5 font-display text-[22px] font-medium leading-[1.35] text-ink-900 shadow-card">
-              {current.text}
-            </div>
-          ) : (
-            <div>
-              <div className="max-w-140 rounded-[22px] border border-line bg-white px-5 py-4 shadow-card">
-                <div className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.06em] text-brand-700">
+        <div className="relative z-2 m-5 mb-0">
+          <div className="max-w-115 rounded-3xl border border-line bg-white px-5 py-3.5 font-display text-[15px] font-medium leading-[1.35] text-ink-900 shadow-card">
+            {current?.narrative}
+          </div>
+
+          {hasQuestion && (
+            <div className="mt-2.5">
+              <div className="max-w-115 rounded-[22px] border border-line bg-white px-4 py-3 shadow-card">
+                <div className="mb-1 text-[10px] font-extrabold uppercase tracking-[0.06em] text-brand-700">
                   Pilihanmu
                 </div>
-                <div className="font-display text-[22px] font-semibold leading-tight text-ink-900">
-                  {current.question}
+                <div className="font-display text-[15px] font-semibold leading-tight text-ink-900">
+                  {current.question.prompt}
                 </div>
               </div>
               {!choiceFeedback ? (
-                <div className="mt-3.5 flex max-w-140 flex-col gap-2.5">
-                  {current.options.map((o, i) => (
+                <div className="mt-2.5 flex max-w-115 flex-col gap-2">
+                  {(current.question.choices || []).map((o, i) => (
                     <button
                       key={i}
                       onClick={() => pickChoice(o)}
-                      className="flex cursor-pointer items-center gap-3 rounded-[18px] border-2 border-line bg-white px-4.5 py-3.5 font-body text-[15px] text-ink-900 shadow-[0_3px_0_rgba(122,69,42,0.06)] transition hover:border-brand-300"
+                      className="flex cursor-pointer items-center gap-2.5 rounded-2xl border-2 border-line bg-white px-3.5 py-2.5 font-body text-[13px] text-ink-900 shadow-[0_3px_0_rgba(122,69,42,0.06)] transition hover:border-brand-300"
                     >
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-brand-50 font-display text-sm font-bold text-brand-700">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-50 font-display text-xs font-bold text-brand-700">
                         {String.fromCharCode(65 + i)}
                       </span>
                       <span className="flex-1 text-left font-bold">
@@ -457,14 +593,19 @@ export default function StoryPage() {
 
         <div className="relative z-2 flex items-center gap-3 bg-linear-to-b from-transparent to-black/6 p-6">
           <button
-            onClick={() => page > 0 && setPage(page - 1)}
+            onClick={() => {
+              if (page > 0) {
+                setPage(page - 1);
+                setChoiceFeedback(null);
+              }
+            }}
             disabled={page === 0}
             className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-line bg-white text-ink-700 shadow-soft disabled:opacity-40"
           >
             <Icon name="back" size={20} />
           </button>
           <button
-            disabled={current.type === "choice" && !choiceFeedback}
+            disabled={hasQuestion && !choiceFeedback}
             onClick={next}
             className="inline-flex max-w-[320px] flex-1 items-center justify-center gap-2.5 rounded-full bg-brand-500 px-5 py-4 font-body text-base font-extrabold text-white shadow-primary transition hover:-translate-y-px hover:bg-brand-600 active:translate-y-0.5 disabled:opacity-50"
           >
@@ -476,4 +617,14 @@ export default function StoryPage() {
       </div>
     </div>
   );
+}
+
+export default function StoryPage() {
+  const { storyId } = useParams();
+  const location = useLocation();
+  const params = location.state?.params;
+
+  if (storyId) return <StoryViewer storyId={storyId} />;
+  if (!params) return <Navigate to="/" replace />;
+  return <StoryGenerator params={params} />;
 }
