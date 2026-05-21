@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   useNavigate,
   useLocation,
@@ -304,6 +304,11 @@ function StoryViewer({ storyId }) {
   const [page, setPage] = useState(0);
   const [choiceFeedback, setChoiceFeedback] = useState(null);
   const [imageProgress, setImageProgress] = useState(null);
+  const sessionStartRef = useRef(null);
+
+  useEffect(() => {
+    sessionStartRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (story) return;
@@ -463,8 +468,36 @@ function StoryViewer({ storyId }) {
 
   const onBack = () => navigate("/");
 
-  function next() {
+  async function next() {
     if (isLast) {
+      let completion = null;
+      try {
+        const res = await fetch(`${API_URL}/stories/${storyId}/complete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({}),
+        });
+        if (res.ok) completion = await res.json();
+      } catch {
+        // best-effort — navigate anyway
+      }
+
+      const startedAt = sessionStartRef.current || Date.now();
+      const minutes = Math.max(1, Math.round((Date.now() - startedAt) / 60000));
+      fetch(`${API_URL}/achievements/play-sessions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ minutes }),
+      }).catch(() => {});
+
       navigate("/story/complete", {
         state: {
           result: {
@@ -473,6 +506,7 @@ function StoryViewer({ storyId }) {
               lesson: story.moral_message,
             },
             value: story.title,
+            completion,
           },
         },
       });
@@ -482,13 +516,42 @@ function StoryViewer({ storyId }) {
     }
   }
 
-  function pickChoice(opt) {
-    setChoiceFeedback({
-      correct: !!opt.is_correct,
-      msg: opt.is_correct
-        ? "Pilihan yang baik!"
-        : "Yuk pikir lagi sebelum melanjutkan.",
-    });
+  async function pickChoice(opt) {
+    const questionId = current?.question?.id;
+    const choiceId = opt?.id;
+
+    setChoiceFeedback({ pending: true });
+    try {
+      const res = await fetch(
+        `${API_URL}/stories/${storyId}/questions/${questionId}/answer`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ choice_id: choiceId }),
+        },
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Gagal mengirim jawaban.");
+
+      setChoiceFeedback({
+        correct: !!data.is_correct,
+        alreadyAnswered: !!data.already_answered,
+        xpAwarded: data.xp_awarded ?? 0,
+        totalXp: data.total_xp,
+        msg: data.is_correct
+          ? "Pilihan yang baik!"
+          : "Yuk pikir lagi sebelum melanjutkan.",
+      });
+    } catch (e) {
+      setChoiceFeedback({
+        correct: !!opt.is_correct,
+        msg: e.message || "Yuk pikir lagi sebelum melanjutkan.",
+      });
+    }
   }
 
   const hasQuestion = !!current?.question;
@@ -572,13 +635,14 @@ function StoryViewer({ storyId }) {
                   {current.question.prompt}
                 </div>
               </div>
-              {!choiceFeedback ? (
+              {!choiceFeedback || choiceFeedback.pending ? (
                 <div className="mt-2.5 flex max-w-115 flex-col gap-2">
                   {(current.question.choices || []).map((o, i) => (
                     <button
                       key={i}
                       onClick={() => pickChoice(o)}
-                      className="flex cursor-pointer items-center gap-2.5 rounded-2xl border-2 border-line bg-white px-3.5 py-2.5 font-body text-[13px] text-ink-900 shadow-[0_3px_0_rgba(122,69,42,0.06)] transition hover:border-brand-300"
+                      disabled={choiceFeedback?.pending}
+                      className="flex cursor-pointer items-center gap-2.5 rounded-2xl border-2 border-line bg-white px-3.5 py-2.5 font-body text-[13px] text-ink-900 shadow-[0_3px_0_rgba(122,69,42,0.06)] transition hover:border-brand-300 disabled:opacity-60"
                     >
                       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-50 font-display text-xs font-bold text-brand-700">
                         {String.fromCharCode(65 + i)}
@@ -619,6 +683,16 @@ function StoryViewer({ storyId }) {
                     <div className="mt-1 text-sm font-semibold text-ink-700">
                       {choiceFeedback.msg}
                     </div>
+                    {choiceFeedback.xpAwarded > 0 && (
+                      <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-extrabold text-brand-700">
+                        +{choiceFeedback.xpAwarded} XP
+                      </div>
+                    )}
+                    {choiceFeedback.alreadyAnswered && (
+                      <div className="mt-1 text-[11px] font-bold text-ink-500">
+                        Sudah pernah dijawab sebelumnya.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -640,7 +714,9 @@ function StoryViewer({ storyId }) {
             <Icon name="back" size={20} />
           </button>
           <button
-            disabled={hasQuestion && !choiceFeedback}
+            disabled={
+              hasQuestion && (!choiceFeedback || choiceFeedback.pending)
+            }
             onClick={next}
             className="inline-flex max-w-[320px] flex-1 items-center justify-center gap-2.5 rounded-full bg-brand-500 px-5 py-4 font-body text-base font-extrabold text-white shadow-primary transition hover:-translate-y-px hover:bg-brand-600 active:translate-y-0.5 disabled:opacity-50"
           >

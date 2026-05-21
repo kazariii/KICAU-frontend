@@ -31,7 +31,10 @@ export default function StoryComplete() {
 
   if (!result) return <Navigate to="/" replace />;
 
-  const { story, value } = result;
+  const { story, value, completion } = result;
+  const xpAwarded = completion?.xp_awarded ?? 100;
+  const totalXp = completion?.total_xp;
+  const alreadyCompleted = !!completion?.already_completed;
   const onHome = () => navigate("/");
   const onNew = () => navigate("/");
 
@@ -82,11 +85,16 @@ export default function StoryComplete() {
             Pahlawan {value || "Berbagi"}!
           </div>
           <div className="mt-1 text-xs font-extrabold text-ink-500">
-            Total XP
+            {alreadyCompleted ? "Cerita sudah pernah diselesaikan" : "XP Diraih"}
           </div>
           <div className="font-display text-[30px] font-bold text-brand-700">
-            +100 XP
+            {alreadyCompleted ? "+0 XP" : `+${xpAwarded} XP`}
           </div>
+          {typeof totalXp === "number" && (
+            <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-brand-700">
+              Total {totalXp} XP
+            </div>
+          )}
         </div>
         <div className="mt-6 flex w-full max-w-115 gap-3">
           <button
