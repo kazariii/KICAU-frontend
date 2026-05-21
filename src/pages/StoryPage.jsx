@@ -383,6 +383,19 @@ function StoryViewer({ storyId }) {
       });
     });
 
+    eventSource.addEventListener("image_retry", (e) => {
+      const data = JSON.parse(e.data);
+      if (cancelled) return;
+      setImageProgress((p) => ({
+        ...(p || {}),
+        message:
+          data.message ||
+          `Ilustrasi ${data.step} percobaan ${data.attempt}/${data.max_attempts}...`,
+        step: Math.max(0, (data.step ?? 1) - 1),
+        total: data.total ?? p?.total,
+      }));
+    });
+
     eventSource.addEventListener("image_failed", (e) => {
       const data = JSON.parse(e.data);
       if (cancelled) return;
@@ -398,6 +411,19 @@ function StoryViewer({ storyId }) {
       eventSource.close();
       if (cancelled) return;
       setImageProgress(null);
+    });
+
+    eventSource.addEventListener("error", (e) => {
+      let msg = "Gagal memuat ilustrasi.";
+      try {
+        const data = JSON.parse(e.data);
+        if (data.message) msg = data.message;
+      } catch {
+        // network error event has no payload
+      }
+      eventSource.close();
+      if (cancelled) return;
+      setImageProgress({ message: msg });
     });
 
     eventSource.onerror = () => {
@@ -421,6 +447,15 @@ function StoryViewer({ storyId }) {
         <button onClick={() => navigate("/")}>Kembali</button>
       </div>
     );
+
+  const generatingImages = allImagesMissing || imageProgress !== null;
+  if (generatingImages) {
+    return (
+      <StoryLoading
+        progress={imageProgress || { message: "Menyiapkan ilustrasi..." }}
+      />
+    );
+  }
 
   const totalPages = items.length;
   const current = items[page];

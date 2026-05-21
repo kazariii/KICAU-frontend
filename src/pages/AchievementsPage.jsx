@@ -15,7 +15,6 @@ export default function AchievementsPage() {
   }, [period]);
 
   const stats = [
-    { icon: "clock", value: "30m", label: "Waktu Bermain", color: "#FBA01F" },
     { icon: "book", value: "12", label: "Cerita Selesai", color: "#E66B85" },
     { icon: "star", value: "90%", label: "Tingkat Sukses", color: "#FCD968" },
   ];
@@ -144,7 +143,7 @@ export default function AchievementsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {stats.map((s, i) => (
           <div
             key={i}
