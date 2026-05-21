@@ -1,9 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import Kimo from "../components/Kimo";
 import { Sparkles } from "../components/Sparkles";
 import { useAuthStore } from "../store/authStore";
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://kicau-api.jevvonn.foo/api";
+
+const RECENT_COLORS = [
+  "bg-[#FFD8E3]",
+  "bg-[#FFE4BC]",
+  "bg-[#C7E4C2]",
+  "bg-[#D9D5F4]",
+  "bg-[#FFCFD8]",
+];
+
+function formatStoryDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now - d;
+  const day = 24 * 60 * 60 * 1000;
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+  const startOfThat = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dayDiff = Math.round((startOfToday - startOfThat) / day);
+
+  if (diffMs < 60 * 1000) return "Baru saja";
+  if (dayDiff === 0) return "Hari ini";
+  if (dayDiff === 1) return "Kemarin";
+  if (dayDiff > 1 && dayDiff < 7) return `${dayDiff} hari lalu`;
+
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 const THEMES = [
   {
@@ -75,37 +112,43 @@ const MORALS = [
   },
 ];
 
-const RECENTS = [
-  {
-    title: "Si Kelinci Jujur",
-    theme: "Fantasi",
-    moral: "Kejujuran",
-    color: "bg-[#FFD8E3]",
-    date: "Kemarin",
-  },
-  {
-    title: "Pasar Hari Minggu",
-    theme: "Belanja",
-    moral: "Menabung",
-    color: "bg-[#FFE4BC]",
-    date: "2 hari lalu",
-  },
-  {
-    title: "Petualangan di Hutan",
-    theme: "Jelajah",
-    moral: "Bijak",
-    color: "bg-[#C7E4C2]",
-    date: "5 hari lalu",
-  },
-];
-
 export default function HomePage() {
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
   const [idea, setIdea] = useState("");
   const [theme, setTheme] = useState(null);
   const [moral, setMoral] = useState(null);
   const [recording, setRecording] = useState(false);
+  const [stories, setStories] = useState([]);
+  const [storiesLoading, setStoriesLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`${API_URL}/stories`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error("Gagal memuat cerita.");
+        const data = await res.json();
+        if (!cancelled) setStories(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setStories([]);
+      } finally {
+        if (!cancelled) setStoriesLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const recentStories = stories.slice(0, 3);
 
   const dailyChallenge = {
     title: "Tantangan Hari Ini",
@@ -142,17 +185,6 @@ export default function HomePage() {
               Hari ini kita mau bikin cerita tentang apa? Ketik idemu, atau
               pilih dari di bawah.
             </p>
-          </div>
-          <div className="flex items-center gap-3 rounded-[20px] border border-line bg-white px-5 py-3.5 shadow-soft">
-            <div className="text-3xl leading-none">🔥</div>
-            <div>
-              <div className="font-display text-2xl font-bold text-ink-900">
-                5 hari
-              </div>
-              <div className="text-xs font-bold text-ink-500">
-                streak belajar
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -276,7 +308,78 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Daily challenge */}
+          <div className="rounded-[24px] border border-line bg-white p-7 shadow-card">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-[22px]">Semua Cerita</h2>
+              <span className="text-xs font-extrabold text-ink-500">
+                {stories.length} cerita
+              </span>
+            </div>
+            {storiesLoading ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-20 animate-pulse rounded-2xl border border-line bg-cream-50"
+                  />
+                ))}
+              </div>
+            ) : stories.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-line bg-cream-50 px-4 py-8 text-center">
+                <div className="font-display text-base font-semibold text-ink-900">
+                  Belum ada cerita
+                </div>
+                <div className="mt-1 text-sm font-bold text-ink-500">
+                  Mulai bikin cerita pertamamu di atas!
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3">
+                {stories.map((s, i) => (
+                  <button
+                    key={s.id}
+                    onClick={() => navigate(`/story/${s.id}`)}
+                    className="flex w-full items-start gap-3 rounded-2xl border border-line bg-cream-50 px-3.5 py-3 text-left transition hover:border-line-strong"
+                  >
+                    <div
+                      className={[
+                        "grid h-12 w-12 shrink-0 place-items-center rounded-xl",
+                        RECENT_COLORS[i % RECENT_COLORS.length],
+                      ].join(" ")}
+                    >
+                      <Icon
+                        name="book"
+                        size={22}
+                        color="var(--color-ink-700)"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-display text-sm font-semibold text-ink-900">
+                        {s.title}
+                      </div>
+                      {s.moral_message && (
+                        <div className="mt-0.5 line-clamp-2 text-xs font-semibold text-ink-500">
+                          {s.moral_message}
+                        </div>
+                      )}
+                      <div className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.04em] text-brand-700">
+                        {formatStoryDate(s.created_at)}
+                      </div>
+                    </div>
+                    <Icon
+                      name="play"
+                      size={16}
+                      color="var(--color-brand-500)"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT: side */}
+        <div className="flex flex-col gap-5">
           <div className="flex items-center gap-4.5 rounded-[24px] border border-line bg-linear-to-r from-[#FFF1DA] to-[#FFE0B0] p-6 shadow-card">
             <div className="grid h-15 w-15 shrink-0 place-items-center rounded-[18px] bg-white">
               <Icon name="target" size={28} color="var(--color-brand-500)" />
@@ -301,63 +404,58 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* RIGHT: side */}
-        <div className="flex flex-col gap-5">
-          <div className="relative overflow-hidden rounded-[24px] border border-line bg-linear-to-br from-[#2A140A] to-[#4D2613] p-5.5 text-white shadow-card">
-            <div className="absolute -bottom-6 -right-6 opacity-30">
-              <Kimo pose="headphones" size={150} />
-            </div>
-            <div className="text-xs font-extrabold uppercase tracking-[0.06em] text-brand-300">
-              Lanjutkan
-            </div>
-            <div className="mt-1 font-display text-[22px] font-semibold">
-              Petualangan di Pasar
-            </div>
-            <div className="mt-1 text-[13px] font-semibold text-white/70">
-              Halaman 4 dari 8
-            </div>
-            <div className="mt-3.5 h-1.5 overflow-hidden rounded-full bg-white/15">
-              <div className="h-full w-1/2 rounded-full bg-brand-300" />
-            </div>
-            <button className="mt-4 inline-flex items-center gap-2.5 rounded-full bg-brand-500 px-4.5 py-2.5 text-sm font-extrabold text-white">
-              <Icon name="play" size={14} color="white" /> Lanjutkan
-            </button>
-          </div>
 
           <div className="rounded-[24px] border border-line bg-white p-5.5 shadow-card">
             <div className="mb-3.5 flex items-center justify-between">
               <h3 className="text-lg">Cerita Terakhir</h3>
-              <a href="#" className="text-[13px] font-extrabold text-brand-600">
-                Lihat semua
-              </a>
             </div>
             <div className="flex flex-col gap-2.5">
-              {RECENTS.map((r, i) => (
-                <button
-                  key={i}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-line bg-cream-50 px-3 py-2.5 transition hover:border-line-strong"
-                >
+              {storiesLoading ? (
+                [0, 1, 2].map((i) => (
                   <div
-                    className={[
-                      "grid h-12 w-12 shrink-0 place-items-center rounded-xl",
-                      r.color,
-                    ].join(" ")}
+                    key={i}
+                    className="h-16 animate-pulse rounded-2xl border border-line bg-cream-50"
+                  />
+                ))
+              ) : recentStories.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-line bg-cream-50 px-3 py-5 text-center text-xs font-bold text-ink-500">
+                  Belum ada cerita.
+                </div>
+              ) : (
+                recentStories.map((s, i) => (
+                  <button
+                    key={s.id}
+                    onClick={() => navigate(`/story/${s.id}`)}
+                    className="flex w-full items-center gap-3 rounded-2xl border border-line bg-cream-50 px-3 py-2.5 text-left transition hover:border-line-strong"
                   >
-                    <Icon name="book" size={22} color="var(--color-ink-700)" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <div className="font-display text-sm font-semibold text-ink-900">
-                      {r.title}
+                    <div
+                      className={[
+                        "grid h-12 w-12 shrink-0 place-items-center rounded-xl",
+                        RECENT_COLORS[i % RECENT_COLORS.length],
+                      ].join(" ")}
+                    >
+                      <Icon
+                        name="book"
+                        size={22}
+                        color="var(--color-ink-700)"
+                      />
                     </div>
-                    <div className="mt-0.5 text-xs font-bold text-ink-500">
-                      {r.theme} · {r.moral} · {r.date}
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-display text-sm font-semibold text-ink-900">
+                        {s.title}
+                      </div>
+                      <div className="mt-0.5 text-xs font-bold text-ink-500">
+                        {formatStoryDate(s.created_at)}
+                      </div>
                     </div>
-                  </div>
-                  <Icon name="play" size={16} color="var(--color-brand-500)" />
-                </button>
-              ))}
+                    <Icon
+                      name="play"
+                      size={16}
+                      color="var(--color-brand-500)"
+                    />
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
