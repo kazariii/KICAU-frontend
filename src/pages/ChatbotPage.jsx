@@ -11,6 +11,24 @@ function nowTime() {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+function formatTime(iso) {
+  if (!iso) return nowTime();
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return nowTime();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function formatSessionDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function Bubble({ role, text, time }) {
   const isUser = role === "user";
   return (
@@ -28,7 +46,7 @@ function Bubble({ role, text, time }) {
       <div className="max-w-[78%]">
         <div
           className={[
-            "animate-slide-up px-4 py-3 text-sm font-semibold leading-[1.45] shadow-soft",
+            "animate-slide-up whitespace-pre-wrap px-4 py-3 text-sm font-semibold leading-[1.45] shadow-soft",
             isUser
               ? "rounded-[20px_20px_6px_20px] bg-linear-to-r from-[#4D2613] to-[#2A140A] text-white"
               : "rounded-[20px_20px_20px_6px] bg-linear-to-r from-[#FBA01F] to-[#F08A2E] text-white",
@@ -49,45 +67,109 @@ function Bubble({ role, text, time }) {
   );
 }
 
-function SideStat({ icon, label, value, color }) {
-  return (
-    <div className="flex items-center gap-3 border-b border-dashed border-line py-2.5">
-      <div
-        className="grid h-9 w-9 place-items-center rounded-xl"
-        style={{ background: `${color}22`, color }}
-      >
-        <Icon name={icon} size={18} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[11px] font-extrabold uppercase tracking-[0.04em] text-ink-500">
-          {label}
-        </div>
-        <div className="mt-0.5 truncate text-sm font-extrabold text-ink-900">
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function ChatbotPage() {
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
-  const [messages, setMessages] = useState([
-    {
-      role: "bot",
-      text: `Halo! Kanca di sini, saya tadi menemani ${user.name} bermain dan belajar. Ingin tahu apa saja yang ia pelajari hari ini? ✨`,
-      time: nowTime(),
-    },
-  ]);
+
+  const initialGreeting = {
+    role: "bot",
+    text: `Halo! Kanca di sini, saya tadi menemani ${user.name} bermain dan belajar. Ingin tahu apa saja yang ia pelajari hari ini? ✨`,
+    time: nowTime(),
+  };
+
+  const [sessions, setSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [messages, setMessages] = useState([initialGreeting]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [promptsOpen, setPromptsOpen] = useState(true);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current)
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, typing]);
+
+  async function fetchSessions() {
+    setSessionsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/chatbot/sessions`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setSessions(Array.isArray(data) ? data : []);
+    } catch {
+      setSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    queueMicrotask(() => fetchSessions());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function loadSession(id) {
+    setActiveSessionId(id);
+    setSessionLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/chatbot/sessions/${id}`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      const msgs = Array.isArray(data?.messages)
+        ? data.messages.map((m) => ({
+            role: m.role === "assistant" ? "bot" : "user",
+            text: m.content,
+            time: formatTime(m.created_at),
+          }))
+        : [];
+      setMessages(msgs.length ? msgs : [initialGreeting]);
+    } catch {
+      setMessages([
+        {
+          role: "bot",
+          text: "Maaf, gagal memuat sesi ini.",
+          time: nowTime(),
+        },
+      ]);
+    } finally {
+      setSessionLoading(false);
+    }
+  }
+
+  function newChat() {
+    setActiveSessionId(null);
+    setMessages([initialGreeting]);
+    setInput("");
+  }
+
+  async function deleteSession(id, e) {
+    e.stopPropagation();
+    if (!confirm("Hapus sesi ini?")) return;
+    try {
+      await fetch(`${API_URL}/chatbot/sessions/${id}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (activeSessionId === id) newChat();
+      fetchSessions();
+    } catch {
+      // ignore
+    }
+  }
 
   const quickPrompts = [
     {
@@ -119,6 +201,10 @@ export default function ChatbotPage() {
     setInput("");
     setTyping(true);
     try {
+      setPromptsOpen(false);
+      const body = { prompt: text.trim() };
+      if (activeSessionId) body.session_id = activeSessionId;
+
       const res = await fetch(`${API_URL}/chatbot/chat`, {
         method: "POST",
         headers: {
@@ -126,17 +212,29 @@ export default function ChatbotPage() {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ message: text.trim() }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       const reply =
-        data.reply ||
-        data.message ||
+        data?.reply?.content ||
+        data?.message ||
         "Maaf, saya tidak mengerti. Coba tanya lagi ya!";
+
+      const newSessionId = data?.session?.id;
+      if (newSessionId && newSessionId !== activeSessionId) {
+        setActiveSessionId(newSessionId);
+      }
+
       setMessages((m) => [
         ...m,
-        { role: "bot", text: reply.trim(), time: nowTime() },
+        {
+          role: "bot",
+          text: String(reply).trim(),
+          time: formatTime(data?.reply?.created_at),
+        },
       ]);
+
+      fetchSessions();
     } catch {
       setMessages((m) => [
         ...m,
@@ -146,6 +244,7 @@ export default function ChatbotPage() {
           time: nowTime(),
         },
       ]);
+      setPromptsOpen(true);
     } finally {
       setTyping(false);
     }
@@ -171,11 +270,12 @@ export default function ChatbotPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="grid h-10 w-10 cursor-pointer place-items-center rounded-xl border-0 bg-white text-ink-700 shadow-soft">
-              <Icon name="chart" size={18} />
-            </button>
-            <button className="grid h-10 w-10 cursor-pointer place-items-center rounded-xl border-0 bg-white text-ink-700 shadow-soft">
-              <Icon name="menu" size={18} />
+            <button
+              onClick={newChat}
+              className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border-0 bg-white px-3.5 text-sm font-bold text-ink-700 shadow-soft"
+            >
+              <Icon name="plus" size={16} />
+              Chat Baru
             </button>
           </div>
         </div>
@@ -191,9 +291,15 @@ export default function ChatbotPage() {
               <div className="mb-3.5 mt-1 text-center text-[11px] font-extrabold text-ink-300">
                 Hari ini · {nowTime()}
               </div>
-              {messages.map((m, i) => (
-                <Bubble key={i} role={m.role} text={m.text} time={m.time} />
-              ))}
+              {sessionLoading ? (
+                <div className="py-10 text-center text-sm font-bold text-ink-500">
+                  Memuat sesi...
+                </div>
+              ) : (
+                messages.map((m, i) => (
+                  <Bubble key={i} role={m.role} text={m.text} time={m.time} />
+                ))
+              )}
               {typing && (
                 <div className="mt-2 flex items-end gap-2">
                   <div className="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-brand-50">
@@ -215,28 +321,58 @@ export default function ChatbotPage() {
             </div>
 
             {/* Quick prompts */}
-            <div className="grid grid-cols-2 gap-2 border-t border-line bg-white px-6 py-3">
-              {quickPrompts.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => send(q.title + ": " + q.sub)}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-[14px] border border-line bg-cream-100 px-3 py-2.5 transition hover:border-line-strong"
+            <div className="border-t border-line bg-white">
+              <button
+                type="button"
+                onClick={() => setPromptsOpen((v) => !v)}
+                className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-6 py-2.5 text-left"
+              >
+                <span className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
+                  Saran Pertanyaan
+                </span>
+                <span
+                  className={[
+                    "grid h-6 w-6 place-items-center rounded-full bg-cream-100 text-ink-700 transition-transform",
+                    promptsOpen ? "rotate-180" : "rotate-0",
+                  ].join(" ")}
                 >
-                  <Icon
-                    name={q.icon}
-                    size={18}
-                    color="var(--color-brand-600)"
-                  />
-                  <div className="flex min-w-0 flex-col text-left">
-                    <div className="font-display text-[13px] font-semibold text-ink-900">
-                      {q.title}
-                    </div>
-                    <div className="truncate text-[11px] font-bold text-ink-500">
-                      {q.sub}
-                    </div>
+                  <Icon name="chevron-down" size={14} />
+                </span>
+              </button>
+              <div
+                className={[
+                  "grid overflow-hidden transition-all duration-300 ease-in-out",
+                  promptsOpen
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0",
+                ].join(" ")}
+              >
+                <div className="min-h-0">
+                  <div className="grid grid-cols-2 gap-2 px-6 pb-3">
+                    {quickPrompts.map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => send(q.title + ": " + q.sub)}
+                        className="flex cursor-pointer items-center gap-2.5 rounded-[14px] border border-line bg-cream-100 px-3 py-2.5 transition hover:border-line-strong"
+                      >
+                        <Icon
+                          name={q.icon}
+                          size={18}
+                          color="var(--color-brand-600)"
+                        />
+                        <div className="flex min-w-0 flex-col text-left">
+                          <div className="font-display text-[13px] font-semibold text-ink-900">
+                            {q.title}
+                          </div>
+                          <div className="truncate text-[11px] font-bold text-ink-500">
+                            {q.sub}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
-                </button>
-              ))}
+                </div>
+              </div>
             </div>
 
             {/* Composer */}
@@ -263,46 +399,67 @@ export default function ChatbotPage() {
             </form>
           </div>
 
-          {/* Insights */}
+          {/* Sessions */}
           <aside className="flex flex-col gap-4 bg-cream-100 p-5">
-            <div className="rounded-[24px] border border-line bg-white p-5 shadow-card">
-              <h4 className="mb-3.5 text-base">Ringkasan Hari Ini</h4>
-              <SideStat
-                icon="clock"
-                label="Waktu Bermain"
-                value="30 menit"
-                color="#FBA01F"
-              />
-              <SideStat
-                icon="book"
-                label="Cerita Selesai"
-                value="1 (Si Kelinci Jujur)"
-                color="#E66B85"
-              />
-              <SideStat
-                icon="medal"
-                label="Lencana Baru"
-                value="Si Jujur Hebat"
-                color="#FCD968"
-              />
-              <SideStat
-                icon="fire"
-                label="Streak"
-                value="5 hari"
-                color="#F59330"
-              />
-            </div>
-            <div className="rounded-[24px] border border-line bg-linear-to-br from-[#FFF1DA] to-[#FFE0B0] p-5 shadow-card">
-              <div className="text-xs font-extrabold uppercase tracking-[0.06em] text-brand-700">
-                Saran Kanca
+            <div className="flex flex-col overflow-hidden rounded-[24px] border border-line bg-white shadow-card">
+              <div className="flex items-center justify-between border-b border-line px-5 py-4">
+                <h4 className="text-base">Riwayat Sesi</h4>
+                <button
+                  onClick={fetchSessions}
+                  className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg border-0 bg-cream-100 text-ink-700"
+                  title="Muat ulang"
+                >
+                  <Icon name="refresh" size={14} />
+                </button>
               </div>
-              <div className="mt-1.5 font-display text-base font-semibold text-ink-900">
-                Ajak ngobrol tentang kejujuran sebelum tidur
+              <div className="max-h-130 flex-1 overflow-y-auto p-3">
+                {sessionsLoading ? (
+                  <div className="py-6 text-center text-sm font-bold text-ink-500">
+                    Memuat...
+                  </div>
+                ) : sessions.length === 0 ? (
+                  <div className="py-6 text-center text-sm font-bold text-ink-500">
+                    Belum ada sesi chat.
+                  </div>
+                ) : (
+                  sessions.map((s) => {
+                    const isActive = s.id === activeSessionId;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => loadSession(s.id)}
+                        className={[
+                          "group mb-2 flex w-full cursor-pointer items-start gap-2 rounded-[14px] border px-3 py-2.5 text-left transition",
+                          isActive
+                            ? "border-brand-500 bg-brand-50"
+                            : "border-line bg-cream-50 hover:border-line-strong",
+                        ].join(" ")}
+                      >
+                        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-brand-600">
+                          <Icon name="chat" size={16} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate font-display text-[13px] font-semibold text-ink-900">
+                            {s.title || `Sesi #${s.id}`}
+                          </div>
+                          <div className="mt-0.5 text-[11px] font-bold text-ink-500">
+                            {formatSessionDate(s.updated_at || s.created_at)}
+                          </div>
+                        </div>
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => deleteSession(s.id, e)}
+                          className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-lg text-ink-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                          title="Hapus sesi"
+                        >
+                          <Icon name="trash" size={14} />
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
               </div>
-              <p className="mt-1.5 text-[13px] font-semibold text-ink-500">
-                Skor kejujurannya tinggi minggu ini. Refleksi singkat akan
-                memperkuat pemahaman.
-              </p>
             </div>
           </aside>
         </div>
